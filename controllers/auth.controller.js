@@ -9,11 +9,16 @@ const login = async (req, res) => {
       return res.status(400).json({ error: 'Email y contraseña son requeridos' });
     }
 
+    console.log('LOGIN INTENTO:', email);
+
     const { data: usuario, error } = await supabase
       .from('usuarios')
       .select('*')
       .eq('email', email.toLowerCase().trim())
       .single();
+
+    console.log('SUPABASE ERROR:', JSON.stringify(error));
+    console.log('USUARIO ENCONTRADO:', usuario ? usuario.email : 'NO ENCONTRADO');
 
     if (error || !usuario) {
       return res.status(401).json({ error: 'Credenciales incorrectas' });
@@ -23,7 +28,13 @@ const login = async (req, res) => {
       return res.status(401).json({ error: 'Cuenta desactivada' });
     }
 
+    console.log('HASH EN BD:', usuario.password_hash);
+    console.log('PASSWORD RECIBIDO:', password);
+
     const passwordValido = await bcrypt.compare(password, usuario.password_hash);
+
+    console.log('PASSWORD VALIDO:', passwordValido);
+
     if (!passwordValido) {
       return res.status(401).json({ error: 'Credenciales incorrectas' });
     }
@@ -49,6 +60,7 @@ const login = async (req, res) => {
       }
     });
   } catch (err) {
+    console.log('ERROR CATCH:', err.message);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 };
