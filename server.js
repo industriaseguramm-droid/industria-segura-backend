@@ -1,8 +1,9 @@
 require('dotenv').config();
-const path = require('path');
+
 const express = require('express');
 const cors    = require('cors');
 const morgan  = require('morgan');
+const path    = require('path');
 
 const authRoutes   = require('./routes/auth.routes');
 const portalRoutes = require('./routes/portal.routes');
@@ -10,7 +11,6 @@ const expRoutes    = require('./routes/expedientes.routes');
 const arcRoutes    = require('./routes/archivos.routes');
 const cliRoutes    = require('./routes/clientes.routes');
 const cfgRoutes    = require('./routes/configuracion.routes');
-const path = requiere('path')
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
@@ -37,21 +37,8 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
-
-app.get('/health', (req, res) => {
-  res.json({
-    ok: true,
-    servicio: 'Industria Segura MM API',
-    version: '1.0.0',
-    entorno: process.env.NODE_ENV || 'development',
-    timestamp: new Date().toISOString()
-  });
-});
-
-// ── ARCHIVOS ESTÁTICOS ────────────────────────────────────────
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ── HEALTH CHECK ──────────────────────────────────────────────
 app.get('/health', (req, res) => {
   res.json({
     ok: true,
@@ -62,7 +49,6 @@ app.get('/health', (req, res) => {
   });
 });
 
-// ── RUTAS DE LA API ───────────────────────────────────────────
 app.use('/api/auth',          authRoutes);
 app.use('/api/portal',        portalRoutes);
 app.use('/api/expedientes',   expRoutes);
@@ -70,7 +56,6 @@ app.use('/api/archivos',      arcRoutes);
 app.use('/api/clientes',      cliRoutes);
 app.use('/api/configuracion', cfgRoutes);
 
-// ── RUTA RAÍZ ─────────────────────────────────────────────────
 app.get('/', (req, res) => {
   res.json({
     ok: true,
@@ -80,18 +65,14 @@ app.get('/', (req, res) => {
   });
 });
 
-// ── PORTAL DEL CLIENTE ────────────────────────────────────────
-// Sirve el HTML para cualquier ruta /portal/...
 app.get('/portal/*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'portal-cliente-conectado.html'));
 });
 
-// ── 404 ───────────────────────────────────────────────────────
 app.use('*', (req, res) => {
-  res.status(404).json({ error: `Ruta no encontrada: ${req.method} ${req.originalUrl}` });
+  res.status(404).json({ error: 'Ruta no encontrada: ' + req.method + ' ' + req.originalUrl });
 });
 
-// ── MANEJO DE ERRORES ─────────────────────────────────────────
 app.use((err, req, res, next) => {
   if (err.code === 'LIMIT_FILE_SIZE') {
     return res.status(400).json({ error: 'El archivo excede el tamaño máximo permitido' });
@@ -111,12 +92,5 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, () => {
-  console.log('');
-  console.log('╔══════════════════════════════════════════╗');
-  console.log('║     Industria Segura MM — API v1.0       ║');
-  console.log('╠══════════════════════════════════════════╣');
-  console.log(`║  Puerto  : ${PORT}                            ║`);
-  console.log(`║  Health  : http://localhost:${PORT}/health ║`);
-  console.log('╚══════════════════════════════════════════╝');
-  console.log('');
+  console.log('Industria Segura MM API corriendo en puerto ' + PORT);
 });
