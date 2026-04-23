@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Industria Segura MM — Portal del Cliente</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+
+<!-- ════════════════════════════════════════════════════════════
+     CONFIGURACIÓN — Cambia esta URL por la de tu backend
+     ════════════════════════════════════════════════════════════ -->
+<script>
+  // ⚠️ IMPORTANTE: Cambia esta URL cuando despliegues en Railway
+  const API_URL = 'https://industria-segura-backend-production.up.railway.app';
+</script>
+<style>
+  :root {
+    --rojo: #D72B2B; --rojo-dark: #A81F1F; --rojo-light: #F5E5E5;
+    --negro: #111111; --gris-oscuro: #2A2A2A; --gris-medio: #5A5A5A;
+    --gris-claro: #F4F4F2; --blanco: #FAFAF8; --borde: #E2E0DC;
+    --verde: #1A7A4A; --verde-light: #E6F4ED;
+    --amarillo: #C97A00; --amarillo-light: #FFF4E0;
+    --azul: #1A4A8A; --azul-light: #E6EEF8;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'DM Sans',sans-serif; background:var(--blanco); color:var(--negro); min-height:100vh; }
+
+  /* HEADER */
+  .header { background:var(--negro); padding:0 24px; display:flex; align-items:center; justify-content:space-between; height:64px; position:sticky; top:0; z-index:100; border-bottom:3px solid var(--rojo); }
+  .logo { display:flex; align-items:center; gap:10px; }
+  .logo-icon { width:36px; height:36px; background:var(--rojo); border-radius:6px; display:flex; align-items:center; justify-content:center; font-family:'Syne',sans-serif; font-weight:800; color:white; font-size:16px; letter-spacing:-1px; }
+  .logo-text { font-family:'Syne',sans-serif; font-weight:700; color:white; font-size:15px; line-height:1.2; }
+  .logo-text span { display:block; font-weight:400; font-size:11px; color:#888; font-family:'DM Sans',sans-serif; }
+  .badge-folio { background:var(--gris-oscuro); border:1px solid #444; border-radius:20px; padding:4px 12px; font-size:12px; color:#aaa; }
+  .badge-folio strong { color:white; }
+
+  /* PROGRESS */
+  .progress-wrapper { background:white; border-bottom:1px solid var(--borde); padding:16px 24px; position:sticky; top:64px; z-index:99; box-shadow:0 2px 8px rgba(0,0,0,0.05); }
+  .progress-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+  .progress-label { font-family:'Syne',sans-serif; font-weight:600; font-size:13px; color:var(--gris-oscuro); }
+  .progress-pct { font-family:'Syne',sans-serif; font-weight:800; font-size:20px; color:var(--rojo); }
+  .progress-bar-bg { height:6px; background:var(--gris-claro); border-radius:99px; overflow:hidden; }
+  .progress-bar-fill { height:100%; background:linear-gradient(90deg,var(--rojo-dark),var(--rojo)); border-radius:99px; transition:width 0.6s cubic-bezier(0.4,0,0.2,1); }
+  .steps-nav { display:flex; gap:8px; margin-top:12px; overflow-x:auto; scrollbar-width:none; padding-bottom:2px; }
+  .steps-nav::-webkit-scrollbar { display:none; }
+  .step-pill { flex-shrink:0; display:flex; align-items:center; gap:6px; padding:5px 10px; border-radius:20px; font-size:12px; font-weight:500; cursor:pointer; border:1.5px solid transparent; transition:all 0.2s; white-space:nowrap; }
+  .step-pill.done { background:var(--verde-light); color:var(--verde); border-color:var(--verde); }
+  .step-pill.active { background:var(--rojo); color:white; border-color:var(--rojo); }
+  .step-pill.pending { background:var(--gris-claro); color:var(--gris-medio); border-color:var(--borde); }
+  .step-pill .dot { width:7px; height:7px; border-radius:50%; background:currentColor; opacity:0.7; }
+
+  /* MAIN */
+  .main { max-width:720px; margin:0 auto; padding:32px 20px 80px; }
+  .section-card { display:none; animation:fadeUp 0.4s ease forwards; }
+  .section-card.active { display:block; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+  /* SECTION HEADER */
+  .section-tag { display:inline-block; background:var(--rojo); color:white; font-family:'Syne',sans-serif; font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; padding:3px 10px; border-radius:4px; margin-bottom:10px; }
+  .section-title { font-family:'Syne',sans-serif; font-weight:800; font-size:26px; line-height:1.2; color:var(--negro); margin-bottom:8px; }
+  .section-desc { font-size:14px; color:var(--gris-medio); line-height:1.6; }
+  .section-header { margin-bottom:28px; }
+
+  /* FIELDS */
+  .field-group { margin-bottom:20px; }
+  .field-label { font-family:'Syne',sans-serif; font-weight:600; font-size:13px; color:var(--gris-oscuro); margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+  .field-label .req { color:var(--rojo); font-size:14px; }
+  .field-label .opt { font-size:11px; font-weight:400; color:#aaa; font-family:'DM Sans',sans-serif; }
+  .field-input { width:100%; padding:12px 14px; border:1.5px solid var(--borde); border-radius:10px; font-family:'DM Sans',sans-serif; font-size:14px; color:var(--negro); background:white; transition:border-color 0.2s,box-shadow 0.2s; outline:none; appearance:none; }
+  .field-input:focus { border-color:var(--rojo); box-shadow:0 0 0 3px rgba(215,43,43,0.1); }
+  .field-input::placeholder { color:#bbb; }
+  textarea.field-input { resize:vertical; min-height:90px; }
+  select.field-input { background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23999' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 14px center; padding-right:36px; }
+  .field-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  @media(max-width:480px){ .field-row { grid-template-columns:1fr; } }
+
+  /* STATUS OPTIONS */
+  .status-opts { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
+  .status-btn { display:flex; align-items:center; gap:5px; padding:5px 11px; border-radius:20px; font-size:12px; font-weight:500; cursor:pointer; border:1.5px solid var(--borde); background:white; color:var(--gris-medio); transition:all 0.15s; user-select:none; }
+  .status-btn svg { width:13px; height:13px; flex-shrink:0; }
+  .status-btn.active-no-tengo  { background:var(--rojo-light); border-color:var(--rojo); color:var(--rojo); }
+  .status-btn.active-no-aplica { background:var(--azul-light); border-color:var(--azul); color:var(--azul); }
+  .status-btn.active-pendiente { background:var(--amarillo-light); border-color:var(--amarillo); color:var(--amarillo); }
+  .field-status-badge { display:none; font-size:11px; font-weight:500; padding:3px 8px; border-radius:4px; margin-top:6px; }
+  .field-status-badge.show { display:inline-flex; align-items:center; gap:4px; }
+  .field-status-badge.no-tengo  { background:var(--rojo-light); color:var(--rojo); }
+  .field-status-badge.no-aplica { background:var(--azul-light); color:var(--azul); }
+  .field-status-badge.pendiente { background:var(--amarillo-light); color:var(--amarillo); }
+
+  /* UPLOAD */
+  .upload-zone { border:2px dashed var(--borde); border-radius:12px; padding:24px; text-align:center; cursor:pointer; transition:all 0.2s; background:var(--gris-claro); position:relative; }
+  .upload-zone:hover { border-color:var(--rojo); background:var(--rojo-light); }
+  .upload-zone input { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
+  .upload-icon { width:40px; height:40px; background:white; border-radius:10px; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; box-shadow:0 2px 8px rgba(0,0,0,0.08); }
+  .upload-title { font-family:'Syne',sans-serif; font-weight:600; font-size:14px; color:var(--gris-oscuro); margin-bottom:4px; }
+  .upload-hint { font-size:12px; color:#aaa; }
+
+  /* PHOTO GRID */
+  .photo-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+  @media(max-width:480px){ .photo-grid { grid-template-columns:1fr; } }
+  .photo-item { border:1.5px solid var(--borde); border-radius:12px; overflow:hidden; background:white; transition:border-color 0.2s; }
+  .photo-item.uploaded { border-color:var(--verde); }
+  .photo-item-header { padding:10px 12px; display:flex; align-items:center; gap:8px; border-bottom:1px solid var(--borde); }
+  .photo-item-icon { width:28px; height:28px; border-radius:6px; background:var(--rojo-light); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .photo-item-label { font-size:12px; font-weight:500; color:var(--gris-oscuro); line-height:1.3; }
+  .photo-item-body { padding:10px 12px; }
+  .photo-mini-upload { display:flex; align-items:center; gap:8px; padding:8px 10px; border:1.5px dashed var(--borde); border-radius:8px; cursor:pointer; font-size:12px; color:var(--gris-medio); transition:all 0.2s; position:relative; }
+  .photo-mini-upload:hover { border-color:var(--rojo); color:var(--rojo); }
+  .photo-mini-upload input { position:absolute; inset:0; opacity:0; cursor:pointer; }
+  .photo-uploaded-preview { display:none; align-items:center; gap:8px; padding:6px 8px; background:var(--verde-light); border-radius:8px; }
+  .photo-uploaded-preview.show { display:flex; }
+  .photo-uploaded-preview img { width:36px; height:36px; border-radius:5px; object-fit:cover; }
+  .photo-uploaded-preview span { font-size:11px; color:var(--verde); font-weight:500; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+  /* MISC */
+  .divider { height:1px; background:var(--borde); margin:28px 0; }
+  .subsection-title { font-family:'Syne',sans-serif; font-weight:700; font-size:14px; color:var(--gris-oscuro); margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+  .subsection-title::before { content:''; width:4px; height:16px; background:var(--rojo); border-radius:2px; display:inline-block; }
+  .check-group { display:flex; flex-direction:column; gap:8px; }
+  .check-item { display:flex; align-items:center; gap:10px; padding:10px 14px; border:1.5px solid var(--borde); border-radius:10px; cursor:pointer; transition:all 0.15s; user-select:none; }
+  .check-item:hover { border-color:var(--rojo); background:var(--rojo-light); }
+  .check-item input { display:none; }
+  .check-box { width:18px; height:18px; border:2px solid var(--borde); border-radius:5px; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all 0.15s; background:white; }
+  .check-item input:checked ~ .check-box { background:var(--rojo); border-color:var(--rojo); }
+  .check-item input:checked ~ .check-box::after { content:''; width:4px; height:8px; border:2px solid white; border-top:none; border-left:none; transform:rotate(45deg) translateY(-1px); display:block; }
+  .check-label { font-size:14px; color:var(--gris-medio); }
+  .check-item input:checked ~ .check-label { color:var(--negro); font-weight:500; }
+  .counter-input { display:flex; align-items:center; border:1.5px solid var(--borde); border-radius:10px; overflow:hidden; width:fit-content; }
+  .counter-btn { width:40px; height:44px; background:var(--gris-claro); border:none; font-size:20px; cursor:pointer; color:var(--gris-oscuro); display:flex; align-items:center; justify-content:center; transition:background 0.15s; user-select:none; }
+  .counter-btn:hover { background:var(--borde); }
+  .counter-val { min-width:56px; height:44px; display:flex; align-items:center; justify-content:center; font-family:'Syne',sans-serif; font-weight:700; font-size:18px; color:var(--negro); border-left:1px solid var(--borde); border-right:1px solid var(--borde); }
+  .field-hint { font-size:12px; color:#aaa; margin-top:5px; line-height:1.4; }
+
+  /* NAV BUTTONS */
+  .nav-buttons { display:flex; justify-content:space-between; align-items:center; margin-top:36px; gap:12px; }
+  .btn { padding:13px 24px; border-radius:10px; font-family:'Syne',sans-serif; font-weight:700; font-size:14px; cursor:pointer; border:none; display:flex; align-items:center; gap:8px; transition:all 0.2s; }
+  .btn-primary { background:var(--rojo); color:white; flex:1; justify-content:center; max-width:260px; }
+  .btn-primary:hover { background:var(--rojo-dark); transform:translateY(-1px); box-shadow:0 4px 16px rgba(215,43,43,0.3); }
+  .btn-primary:disabled { opacity:0.6; cursor:not-allowed; transform:none; box-shadow:none; }
+  .btn-secondary { background:white; color:var(--gris-oscuro); border:1.5px solid var(--borde); }
+  .btn-ghost { background:transparent; color:var(--gris-medio); border:none; padding:13px 8px; font-size:13px; }
+
+  /* SAVE INDICATOR */
+  .save-indicator { display:flex; align-items:center; gap:6px; font-size:12px; color:#aaa; }
+  .save-dot { width:6px; height:6px; border-radius:50%; background:var(--verde); animation:pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* INFO BANNER */
+  .info-banner { background:var(--azul-light); border:1px solid #C0D4F0; border-radius:10px; padding:12px 16px; font-size:13px; color:var(--azul); display:flex; gap:10px; align-items:flex-start; margin-bottom:20px; }
+
+  /* WELCOME */
+  .welcome-screen { text-align:center; padding:40px 0; }
+  .welcome-emblem { width:80px; height:80px; background:var(--negro); border-radius:20px; display:flex; align-items:center; justify-content:center; margin:0 auto 24px; font-family:'Syne',sans-serif; font-weight:800; font-size:28px; color:var(--rojo); letter-spacing:-2px; border:3px solid var(--rojo); }
+  .welcome-title { font-family:'Syne',sans-serif; font-weight:800; font-size:28px; line-height:1.2; margin-bottom:12px; }
+  .welcome-sub { font-size:15px; color:var(--gris-medio); line-height:1.6; max-width:420px; margin:0 auto 32px; }
+  .welcome-steps { display:flex; flex-direction:column; gap:10px; max-width:380px; margin:0 auto 32px; text-align:left; }
+  .welcome-step-item { display:flex; align-items:flex-start; gap:14px; padding:14px 16px; background:var(--gris-claro); border-radius:12px; border:1px solid var(--borde); }
+  .welcome-step-num { width:26px; height:26px; background:var(--rojo); color:white; border-radius:6px; font-family:'Syne',sans-serif; font-weight:800; font-size:13px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .welcome-step-text { font-size:13px; color:var(--gris-oscuro); line-height:1.5; }
+  .welcome-step-text strong { display:block; font-weight:600; color:var(--negro); margin-bottom:2px; }
+
+  /* SUCCESS */
+  .success-screen { text-align:center; padding:60px 0; }
+  .success-icon { width:80px; height:80px; background:var(--verde-light); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 24px; border:3px solid var(--verde); }
+  .success-title { font-family:'Syne',sans-serif; font-weight:800; font-size:26px; color:var(--negro); margin-bottom:10px; }
+  .success-sub { font-size:15px; color:var(--gris-medio); line-height:1.6; max-width:380px; margin:0 auto 32px; }
+  .success-detail { background:var(--gris-claro); border-radius:12px; padding:20px; max-width:360px; margin:0 auto; text-align:left; }
+  .success-detail-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--borde); font-size:13px; }
+  .success-detail-row:last-child { border-bottom:none; }
+  .success-detail-row .key { color:var(--gris-medio); }
+  .success-detail-row .val { font-weight:600; color:var(--negro); }
+
+  /* EXTINTOR */
+  .extintor-row { display:grid; grid-template-columns:1fr 1fr auto; gap:10px; align-items:end; margin-bottom:10px; }
+  .remove-row { width:40px; height:44px; display:flex; align-items:center; justify-content:center; background:var(--rojo-light); border:1.5px solid var(--rojo); border-radius:10px; cursor:pointer; color:var(--rojo); font-size:18px; transition:all 0.15s; }
+  .remove-row:hover { background:var(--rojo); color:white; }
+  .add-row-btn { display:flex; align-items:center; gap:6px; font-size:13px; font-weight:500; color:var(--rojo); cursor:pointer; padding:6px 0; border:none; background:none; font-family:'DM Sans',sans-serif; }
+
+  /* ERROR SCREEN */
+  .error-screen { text-align:center; padding:80px 20px; }
+  .error-title { font-family:'Syne',sans-serif; font-weight:800; font-size:24px; color:var(--negro); margin-bottom:10px; }
+  .error-sub { font-size:14px; color:var(--gris-medio); line-height:1.6; }
+
+  /* LOADING */
+  .loading-screen { text-align:center; padding:80px 20px; }
+  .spinner { width:40px; height:40px; border:3px solid var(--borde); border-top-color:var(--rojo); border-radius:50%; animation:spin 0.8s linear infinite; margin:0 auto 20px; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  @media(max-width:600px){
+    .section-title { font-size:22px; }
+    .main { padding:20px 16px 80px; }
+    .nav-buttons { flex-direction:column-reverse; }
+    .btn-primary { max-width:100%; width:100%; }
+    .btn-secondary { width:100%; justify-content:center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="logo">
+    <div class="logo-icon">IS</div>
+    <div class="logo-text">
+      Industria Segura MM
+      <span>Portal del Cliente</span>
+    </div>
+  </div>
+  <div class="badge-folio">Folio <strong id="folioNum">Cargando...</strong></div>
+</header>
+
+<!-- PROGRESS -->
+<div class="progress-wrapper">
+  <div class="progress-header">
+    <span class="progress-label" id="progressLabel">Cargando...</span>
+    <span class="progress-pct" id="progressPct">0%</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+  </div>
+  <div class="steps-nav" id="stepsNav">
+    <div class="step-pill active" data-step="0"><div class="dot"></div>Inicio</div>
+    <div class="step-pill pending" data-step="1"><div class="dot"></div>Datos generales</div>
+    <div class="step-pill pending" data-step="2"><div class="dot"></div>Operación</div>
+    <div class="step-pill pending" data-step="3"><div class="dot"></div>Seguridad</div>
+    <div class="step-pill pending" data-step="4"><div class="dot"></div>Fotografías</div>
+    <div class="step-pill pending" data-step="5"><div class="dot"></div>Documentos</div>
+    <div class="step-pill pending" data-step="6"><div class="dot"></div>Listo</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- CARGANDO -->
+  <div class="section-card active" id="step-loading">
+    <div class="loading-screen">
+      <div class="spinner"></div>
+      <div style="font-family:'Syne',sans-serif;font-weight:600;font-size:16px;color:var(--gris-oscuro)">Cargando tu expediente...</div>
+    </div>
+  </div>
+
+  <!-- ERROR DE LINK -->
+  <div class="section-card" id="step-error">
+    <div class="error-screen">
+      <div style="font-size:48px;margin-bottom:16px">⚠️</div>
+      <div class="error-title">Link inválido o expirado</div>
+      <div class="error-sub">Este link no existe o ya no está disponible.<br>Contacta a Industria Segura MM para obtener un nuevo link.</div>
+      <div style="margin-top:24px;font-size:13px;color:var(--gris-medio)">WhatsApp: <strong>81XXXXXXXX</strong></div>
+    </div>
+  </div>
+
+  <!-- STEP 0: BIENVENIDA -->
+  <div class="section-card" id="step-0">
+    <div class="welcome-screen">
+      <div class="welcome-emblem">IS</div>
+      <h1 class="welcome-title">Bienvenido a tu portal de<br>Protección Civil</h1>
+      <p class="welcome-sub">Aquí capturarás la información de tu negocio para que nuestro equipo elabore tu Plan de Contingencia personalizado.</p>
+      <div class="welcome-steps">
+        <div class="welcome-step-item"><div class="welcome-step-num">1</div><div class="welcome-step-text"><strong>Llena los datos de tu establecimiento</strong>Nombre, domicilio, aforo, giro y datos del representante legal.</div></div>
+        <div class="welcome-step-item"><div class="welcome-step-num">2</div><div class="welcome-step-text"><strong>Comparte tu información operativa</strong>Actividades, equipos, sustancias y turnos de trabajo.</div></div>
+        <div class="welcome-step-item"><div class="welcome-step-num">3</div><div class="welcome-step-text"><strong>Registra tu equipo de seguridad</strong>Extintores, señalamientos, rutas de evacuación y brigadas.</div></div>
+        <div class="welcome-step-item"><div class="welcome-step-num">4</div><div class="welcome-step-text"><strong>Sube fotografías y documentos</strong>Fachada, extintores, señalización y documentos del negocio.</div></div>
+      </div>
+      <div class="info-banner">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <div>Si no tienes algún dato o archivo, puedes marcarlo como <strong>"No tengo"</strong>, <strong>"No aplica"</strong> o <strong>"Pendiente por enviar"</strong> y continuar sin problema.</div>
+      </div>
+      <button class="btn btn-primary" style="margin:0 auto" onclick="goToStep(1)">
+        Comenzar captura
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- STEP 1: DATOS GENERALES -->
+  <div class="section-card" id="step-1">
+    <div class="section-header">
+      <div class="section-tag">Sección A</div>
+      <h2 class="section-title">Datos generales del establecimiento</h2>
+      <p class="section-desc">Información básica de identificación de tu negocio.</p>
+    </div>
+    <div class="subsection-title">Identificación del negocio</div>
+    <div class="field-group" id="fg-nombre">
+      <div class="field-label">Nombre comercial <span class="req">*</span></div>
+      <input class="field-input" id="in-nombre" type="text" placeholder="Ej. Restaurante La Casona" oninput="onCampoChange('fg-nombre',this,'generales','nombre_comercial')">
+      <div class="status-opts">
+        <button class="status-btn" onclick="setStatus(this,'fg-nombre','no-tengo','generales','nombre_comercial')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>No tengo</button>
+        <button class="status-btn" onclick="setStatus(this,'fg-nombre','pendiente','generales','nombre_comercial')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>Pendiente</button>
+      </div>
+      <div class="field-status-badge" id="badge-fg-nombre"></div>
+    </div>
+    <div class="field-row">
+      <div class="field-group" id="fg-razon">
+        <div class="field-label">Razón social <span class="opt">(opcional)</span></div>
+        <input class="field-input" id="in-razon" type="text" placeholder="Ej. Casona S.A. de C.V." oninput="onCampoChange('fg-razon',this,'generales','razon_social')">
+        <div class="field-status-badge" id="badge-fg-razon"></div>
+      </div>
+      <div class="field-group" id="fg-rfc">
+        <div class="field-label">RFC</div>
+        <input class="field-input" id="in-rfc" type="text" placeholder="XAXX010101000" maxlength="13" style="text-transform:uppercase" oninput="onCampoChange('fg-rfc',this,'generales','rfc')">
+        <div class="status-opts">
+          <button class="status-btn" onclick="setStatus(this,'fg-rfc','no-tengo','generales','rfc')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>No tengo</button>
+          <button class="status-btn" onclick="setStatus(this,'fg-rfc','pendiente','generales','rfc')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>Pendiente</button>
+        </div>
+        <div class="field-status-badge" id="badge-fg-rfc"></div>
+      </div>
+    </div>
+    <div class="field-group" id="fg-rep">
+      <div class="field-label">Representante legal <span class="req">*</span></div>
+      <input class="field-input" id="in-rep" type="text" placeholder="Nombre completo" oninput="onCampoChange('fg-rep',this,'generales','representante_legal')">
+      <div class="status-opts">
+        <button class="status-btn" onclick="setStatus(this,'fg-rep','pendiente','generales','representante_legal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>Pendiente</button>
+      </div>
+      <div class="field-status-badge" id="badge-fg-rep"></div>
+    </div>
+    <div class="divider"></div>
+    <div class="subsection-title">Ubicación y contacto</div>
+    <div class="field-group" id="fg-domicilio">
+      <div class="field-label">Domicilio completo <span class="req">*</span></div>
+      <input class="field-input" id="in-domicilio" type="text" placeholder="Calle, número, colonia" oninput="onCampoChange('fg-domicilio',this,'generales','domicilio')">
+      <div class="field-status-badge" id="badge-fg-domicilio"></div>
+    </div>
+    <div class="field-row">
+      <div class="field-group" id="fg-municipio">
+        <div class="field-label">Municipio <span class="req">*</span></div>
+        <select class="field-input" id="in-municipio" onchange="onCampoChange('fg-municipio',this,'generales','municipio')">
+          <option value="">Selecciona...</option>
+          <option>Guadalupe</option><option>Monterrey</option>
+          <option>San Pedro Garza García</option><option>San Nicolás de los Garza</option>
+          <option>Apodaca</option><option>Escobedo</option>
+          <option>Santa Catarina</option><option>Juárez</option>
+          <option>García</option><option>Otro</option>
+        </select>
+        <div class="field-status-badge" id="badge-fg-municipio"></div>
+      </div>
+      <div class="field-group" id="fg-cp">
+        <div class="field-label">Código postal</div>
+        <input class="field-input" id="in-cp" type="text" inputmode="numeric" maxlength="5" placeholder="Ej. 67140" oninput="onCampoChange('fg-cp',this,'generales','codigo_postal')">
+        <div class="field-status-badge" id="badge-fg-cp"></div>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field-group" id="fg-tel">
+        <div class="field-label">Teléfono <span class="req">*</span></div>
+        <input class="field-input" id="in-tel" type="tel" inputmode="numeric" placeholder="10 dígitos" maxlength="10" oninput="onCampoChange('fg-tel',this,'generales','telefono')">
+        <div class="status-opts">
+          <button class="status-btn" onclick="setStatus(this,'fg-tel','pendiente','generales','telefono')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>Pendiente</button>
+        </div>
+        <div class="field-status-badge" id="badge-fg-tel"></div>
+      </div>
+      <div class="field-group" id="fg-email">
+        <div class="field-label">Correo electrónico</div>
+        <input class="field-input" id="in-email" type="email" placeholder="correo@negocio.com" oninput="onCampoChange('fg-email',this,'generales','email')">
+        <div class="field-status-badge" id="badge-fg-email"></div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="subsection-title">Características del inmueble</div>
+    <div class="field-group" id="fg-giro">
+      <div class="field-label">Giro / Tipo de establecimiento <span class="req">*</span></div>
+      <select class="field-input" id="in-giro" onchange="onCampoChange('fg-giro',this,'generales','giro')">
+        <option value="">Selecciona...</option>
+        <option>Restaurante / Bar</option><option>Consultorio médico / Dental</option>
+        <option>Comercio (tienda, abarrotes)</option><option>Gimnasio / Spa</option>
+        <option>Escuela / Guardería</option><option>Bodega / Almacén</option>
+        <option>Oficinas administrativas</option><option>Centro de rehabilitación</option>
+        <option>Hotel / Hospedaje</option><option>Taller / Industria</option><option>Otro</option>
+      </select>
+      <div class="field-status-badge" id="badge-fg-giro"></div>
+    </div>
+    <div class="field-row">
+      <div class="field-group" id="fg-superficie">
+        <div class="field-label">Superficie del inmueble</div>
+        <input class="field-input" id="in-superficie" type="text" placeholder="Ej. 250 m²" oninput="onCampoChange('fg-superficie',this,'generales','superficie')">
+        <div class="status-opts">
+          <button class="status-btn" onclick="setStatus(this,'fg-superficie','no-tengo','generales','superficie')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>No tengo</button>
+        </div>
+        <div class="field-status-badge" id="badge-fg-superficie"></div>
+      </div>
+      <div class="field-group" id="fg-aforo">
+        <div class="field-label">Aforo máximo</div>
+        <input class="field-input" id="in-aforo" type="text" inputmode="numeric" placeholder="Número de personas" oninput="onCampoChange('fg-aforo',this,'generales','aforo')">
+        <div class="status-opts">
+          <button class="status-btn" onclick="setStatus(this,'fg-aforo','no-tengo','generales','aforo')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>No tengo</button>
+        </div>
+        <div class="field-status-badge" id="badge-fg-aforo"></div>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field-group" id="fg-trabajadores">
+        <div class="field-label">Número de trabajadores</div>
+        <input class="field-input" id="in-trabajadores" type="text" inputmode="numeric" placeholder="Total de empleados" oninput="onCampoChange('fg-trabajadores',this,'generales','trabajadores')">
+        <div class="field-status-badge" id="badge-fg-trabajadores"></div>
+      </div>
+      <div class="field-group" id="fg-horario">
+        <div class="field-label">Horario de operación</div>
+        <input class="field-input" id="in-horario" type="text" placeholder="Ej. Lun-Vie 9:00-18:00" oninput="onCampoChange('fg-horario',this,'generales','horario')">
+        <div class="field-status-badge" id="badge-fg-horario"></div>
+      </div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-ghost" onclick="goToStep(0)">← Atrás</button>
+      <div class="save-indicator"><div class="save-dot"></div><span id="save-label-1">Guardado automáticamente</span></div>
+      <button class="btn btn-primary" onclick="avanzarSeccion(1,2,'generales')">
+        Continuar <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- STEP 2: OPERATIVA (simplificado) -->
+  <div class="section-card" id="step-2">
+    <div class="section-header">
+      <div class="section-tag">Sección B</div>
+      <h2 class="section-title">Información operativa</h2>
+      <p class="section-desc">Describe cómo funciona tu negocio y qué instalaciones tienes.</p>
+    </div>
+    <div class="field-group" id="fg-actividades">
+      <div class="field-label">Actividades principales <span class="req">*</span></div>
+      <textarea class="field-input" id="in-actividades" placeholder="Venta de alimentos, atención médica, almacenamiento de mercancía..." oninput="onCampoChange('fg-actividades',this,'operativa','actividades')"></textarea>
+      <div class="status-opts">
+        <button class="status-btn" onclick="setStatus(this,'fg-actividades','pendiente','operativa','actividades')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>Pendiente</button>
+      </div>
+      <div class="field-status-badge" id="badge-fg-actividades"></div>
+    </div>
+    <div class="field-group" id="fg-areas">
+      <div class="field-label">Áreas del inmueble</div>
+      <textarea class="field-input" id="in-areas" placeholder="Cocina, comedor, bodegas, baños, oficina..." oninput="onCampoChange('fg-areas',this,'operativa','areas')"></textarea>
+      <div class="status-opts">
+        <button class="status-btn" onclick="setStatus(this,'fg-areas','no-tengo','operativa','areas')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>No tengo</button>
+      </div>
+      <div class="field-status-badge" id="badge-fg-areas"></div>
+    </div>
+    <div class="field-group" id="fg-quimicos">
+      <div class="field-label">Sustancias químicas o peligrosas</div>
+      <textarea class="field-input" id="in-quimicos" style="min-height:70px" placeholder="Cloro, thinner, gas LP, refrigerantes... Si no maneja ninguna, escribe 'Ninguna'" oninput="onCampoChange('fg-quimicos',this,'operativa','quimicos')"></textarea>
+      <div class="status-opts">
+        <button class="status-btn" onclick="setStatus(this,'fg-quimicos','no-aplica','operativa','quimicos')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>No aplica</button>
+      </div>
+      <div class="field-status-badge" id="badge-fg-quimicos"></div>
+    </div>
+    <div class="field-group" id="fg-electrico">
+      <div class="field-label">Estado de instalaciones eléctricas</div>
+      <select class="field-input" id="in-electrico" onchange="onCampoChange('fg-electrico',this,'operativa','instalacion_electrica')">
+        <option value="">Selecciona...</option>
+        <option>Bueno — instalación reciente o con mantenimiento</option>
+        <option>Regular — sin mantenimiento reciente</option>
+        <option>Deficiente — cables expuestos o daños visibles</option>
+        <option>No lo sé</option>
+      </select>
+      <div class="field-status-badge" id="badge-fg-electrico"></div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="goToStep(1)">← Atrás</button>
+      <div class="save-indicator"><div class="save-dot"></div><span id="save-label-2">Guardado</span></div>
+      <button class="btn btn-primary" onclick="avanzarSeccion(2,3,'operativa')">
+        Continuar <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- STEP 3: SEGURIDAD -->
+  <div class="section-card" id="step-3">
+    <div class="section-header">
+      <div class="section-tag">Sección C</div>
+      <h2 class="section-title">Seguridad y emergencias</h2>
+      <p class="section-desc">¿Con qué equipo de seguridad cuenta tu negocio?</p>
+    </div>
+    <div class="field-group" id="fg-responsable">
+      <div class="field-label">Responsable de seguridad</div>
+      <input class="field-input" id="in-responsable" type="text" placeholder="Persona encargada de emergencias" oninput="onCampoChange('fg-responsable',this,'seguridad','responsable_seguridad')">
+      <div class="status-opts">
+        <button class="status-btn" onclick="setStatus(this,'fg-responsable','no-tengo','seguridad','responsable_seguridad')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>No tengo</button>
+        <button class="status-btn" onclick="setStatus(this,'fg-responsable','pendiente','seguridad','responsable_seguridad')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>Pendiente</button>
+      </div>
+      <div class="field-status-badge" id="badge-fg-responsable"></div>
+    </div>
+    <div class="field-group" id="fg-tel-emergencia">
+      <div class="field-label">Teléfonos de emergencia internos</div>
+      <textarea class="field-input" id="in-tel-emergencia" style="min-height:70px" placeholder="Responsable: 81-XXXX-XXXX, Gerente: 81-XXXX-XXXX" oninput="onCampoChange('fg-tel-emergencia',this,'seguridad','telefonos_emergencia')"></textarea>
+      <div class="status-opts">
+        <button class="status-btn" onclick="setStatus(this,'fg-tel-emergencia','pendiente','seguridad','telefonos_emergencia')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>Pendiente</button>
+      </div>
+      <div class="field-status-badge" id="badge-fg-tel-emergencia"></div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="goToStep(2)">← Atrás</button>
+      <div class="save-indicator"><div class="save-dot"></div>Guardado</div>
+      <button class="btn btn-primary" onclick="avanzarSeccion(3,4,'seguridad')">
+        Continuar <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- STEP 4: FOTOGRAFÍAS -->
+  <div class="section-card" id="step-4">
+    <div class="section-header">
+      <div class="section-tag">Sección D</div>
+      <h2 class="section-title">Evidencia fotográfica</h2>
+      <p class="section-desc">Sube una foto por categoría desde tu celular o computadora.</p>
+    </div>
+    <div class="info-banner">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <div>Las fotos se guardan directamente en tu expediente. JPG, PNG o HEIC. Máx. 10 MB por foto.</div>
+    </div>
+    <div class="photo-grid" id="photo-grid"></div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="goToStep(3)">← Atrás</button>
+      <div class="save-indicator"><div class="save-dot"></div>Guardado</div>
+      <button class="btn btn-primary" onclick="goToStep(5)">
+        Continuar <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- STEP 5: DOCUMENTOS -->
+  <div class="section-card" id="step-5">
+    <div class="section-header">
+      <div class="section-tag">Sección E</div>
+      <h2 class="section-title">Documentación</h2>
+      <p class="section-desc">Adjunta los documentos requeridos. PDF, JPG o PNG.</p>
+    </div>
+    <div class="field-group" id="fg-ine">
+      <div class="field-label">INE del representante legal <span class="req">*</span></div>
+      <div class="upload-zone" id="zone-ine">
+        <input type="file" accept=".pdf,.jpg,.jpeg,.png" onchange="subirDocumento(this,'ine','zone-ine')" multiple>
+        <div class="upload-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D72B2B" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+        <div class="upload-title">Subir INE</div>
+        <div class="upload-hint">Frente y reverso</div>
+      </div>
+      <div class="status-opts" style="margin-top:10px">
+        <button class="status-btn" onclick="setStatus(this,'fg-ine','no-tengo','documentos','ine')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>No tengo</button>
+        <button class="status-btn" onclick="setStatus(this,'fg-ine','pendiente','documentos','ine')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>Pendiente</button>
+      </div>
+      <div class="field-status-badge" id="badge-fg-ine"></div>
+    </div>
+    <div class="field-group" id="fg-constancia">
+      <div class="field-label">Constancia de situación fiscal (SAT)</div>
+      <div class="upload-zone" id="zone-constancia">
+        <input type="file" accept=".pdf,.jpg,.jpeg,.png" onchange="subirDocumento(this,'constancia_fiscal','zone-constancia')">
+        <div class="upload-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D72B2B" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+        <div class="upload-title">Subir constancia fiscal</div>
+        <div class="upload-hint">PDF o imagen</div>
+      </div>
+      <div class="status-opts" style="margin-top:10px">
+        <button class="status-btn" onclick="setStatus(this,'fg-constancia','no-tengo','documentos','constancia_fiscal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>No tengo</button>
+        <button class="status-btn" onclick="setStatus(this,'fg-constancia','pendiente','documentos','constancia_fiscal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>Pendiente</button>
+      </div>
+      <div class="field-status-badge" id="badge-fg-constancia"></div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="goToStep(4)">← Atrás</button>
+      <div class="save-indicator"><div class="save-dot"></div>Guardado</div>
+      <button class="btn btn-primary" onclick="finalizarEnvio()">
+        Finalizar y enviar
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- STEP 6: SUCCESS -->
+  <div class="section-card" id="step-6">
+    <div class="success-screen">
+      <div class="success-icon">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#1A7A4A" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <h2 class="success-title">¡Información enviada!</h2>
+      <p class="success-sub">Tu expediente fue recibido por el equipo de Industria Segura MM. En breve revisaremos tu información y te contactaremos.</p>
+      <div class="success-detail">
+        <div class="success-detail-row"><span class="key">Folio</span><span class="val" id="success-folio">—</span></div>
+        <div class="success-detail-row"><span class="key">Progreso enviado</span><span class="val" id="success-pct" style="color:var(--verde)">—</span></div>
+        <div class="success-detail-row"><span class="key">Estado</span><span class="val" style="color:var(--amarillo)">En revisión</span></div>
+        <div class="success-detail-row"><span class="key">Siguiente paso</span><span class="val">Te contactaremos por WhatsApp</span></div>
+      </div>
+      <p style="font-size:13px;color:#aaa;margin-top:24px">¿Tienes dudas? Escríbenos al <strong style="color:var(--negro)">WhatsApp de Industria Segura MM</strong></p>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+//  ESTADO GLOBAL
+// ══════════════════════════════════════════════════════════════
+const state = {
+  token:          null,   // Token de la URL
+  expedienteId:   null,   // ID del expediente en la BD
+  folio:          null,   // Folio visible
+  currentStep:    0,
+  progreso:       0,
+  fields:         {},     // Estado local de cada campo
+  counters:       {},
+  guardandoTimer: null,
+  modoOffline:    false   // Si el backend no responde, modo local
+};
+
+const PHOTO_CATS = [
+  {id:'fachada',      label:'Fachada del negocio',     icon:'🏢'},
+  {id:'acceso',       label:'Acceso principal',         icon:'🚪'},
+  {id:'extintor',     label:'Extintores',               icon:'🧯'},
+  {id:'senalizacion', label:'Señalización',             icon:'⚠️'},
+  {id:'botiquin',     label:'Botiquín',                 icon:'🏥'},
+  {id:'tablero',      label:'Tablero eléctrico',        icon:'⚡'},
+  {id:'salida-emerg', label:'Salida de emergencia',     icon:'🚨'},
+  {id:'ruta-evac',    label:'Ruta de evacuación',       icon:'➡️'},
+  {id:'area-riesgo',  label:'Área de riesgo',           icon:'⛔'},
+  {id:'croquis',      label:'Croquis o plano',          icon:'📋'},
+];
+
+const STEPS = ['Bienvenida','Datos generales','Operación','Seguridad','Fotografías','Documentos','Listo'];
+
+// ══════════════════════════════════════════════════════════════
+//  INICIALIZACIÓN — Se ejecuta al cargar la página
+// ══════════════════════════════════════════════════════════════
+async function init() {
+  buildPhotoGrid();
+
+  // Obtener token de la URL: /portal/ABC123
+const partes = window.location.pathname.split('/');
+const token = partes[partes.length - 1];
+
+  // Si no hay token en la URL, intentar modo demo
+ if (!token || token === '' || token === 'portal') {
+  console.warn('Modo demo sin token');
+} else {
+  state.modoOffline = false;
+  state.token = token;
+}
+
+  state.token = token;
+
+  // Cargar expediente desde el backend
+  try {
+    const resp = await fetch(`${API_URL}/api/expedientes/link/${token}`);
+
+    if (!resp.ok) {
+      mostrarStep('step-loading', 'step-error');
+      return;
+    }
+
+    const expediente = await resp.json();
+    state.expedienteId = expediente.id;
+    state.folio        = expediente.folio;
+    state.progreso     = expediente.progreso || 0;
+
+    // Actualizar UI con datos del servidor
+    document.getElementById('folioNum').textContent = expediente.folio;
+    actualizarProgreso(state.progreso);
+
+    // Rellenar formulario con datos ya guardados
+    rellenarFormularioDesdeBD(expediente.datos_json || {});
+
+    mostrarStep('step-loading', 'step-0');
+
+  } catch (err) {
+    console.error('Error de conexión:', err);
+    // Modo offline: usar localStorage como respaldo
+    state.modoOffline = true;
+    state.folio = 'PC-2025-LOCAL';
+    document.getElementById('folioNum').textContent = 'Modo offline';
+    mostrarStep('step-loading', 'step-0');
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  NAVEGACIÓN
+// ══════════════════════════════════════════════════════════════
+function goToStep(n) {
+  document.getElementById('step-' + state.currentStep).classList.remove('active');
+  state.currentStep = n;
+  document.getElementById('step-' + n).classList.add('active');
+  window.scrollTo({ top:0, behavior:'smooth' });
+  updateStepPills();
+  document.getElementById('progressLabel').textContent = STEPS[n] || '';
+  if (n === 6) {
+    document.getElementById('success-folio').textContent = state.folio;
+    document.getElementById('success-pct').textContent   = state.progreso + '%';
+  }
+}
+
+function mostrarStep(ocultar, mostrar) {
+  document.getElementById(ocultar).classList.remove('active');
+  document.getElementById(mostrar).classList.add('active');
+  state.currentStep = parseInt(mostrar.replace('step-','')) || 0;
+  updateStepPills();
+}
+
+function updateStepPills() {
+  document.querySelectorAll('.step-pill').forEach((p, i) => {
+    p.classList.remove('active','done','pending');
+    if (i < state.currentStep)     p.classList.add('done');
+    else if (i === state.currentStep) p.classList.add('active');
+    else                            p.classList.add('pending');
+  });
+}
+
+// ══════════════════════════════════════════════════════════════
+//  AVANZAR SECCIÓN — Guarda antes de pasar al siguiente paso
+// ══════════════════════════════════════════════════════════════
+async function avanzarSeccion(stepActual, stepSiguiente, seccion) {
+  const btn = document.querySelector(`#step-${stepActual} .btn-primary`);
+  if (btn) { btn.disabled = true; btn.textContent = 'Guardando...'; }
+
+  const campos = recopilarSeccion(seccion);
+  const ok     = await guardarEnBackend(seccion, campos);
+
+  if (btn) { btn.disabled = false; btn.innerHTML = `Continuar <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>`; }
+
+  goToStep(stepSiguiente);
+}
+
+// ══════════════════════════════════════════════════════════════
+//  GUARDAR EN EL BACKEND
+// ══════════════════════════════════════════════════════════════
+async function guardarEnBackend(seccion, campos) {
+  if (state.modoOffline) {
+    // Guardar en localStorage como respaldo
+    const clave = `IS_${state.token || 'demo'}_${seccion}`;
+    localStorage.setItem(clave, JSON.stringify(campos));
+    return true;
+  }
+
+  try {
+    const resp = await fetch(`${API_URL}/api/expedientes/link/${state.token}/datos`, {
+      method:  'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ seccion, campos })
+    });
+
+    if (!resp.ok) throw new Error('Error del servidor');
+
+    const data = await resp.json();
+    state.progreso = data.progreso;
+    actualizarProgreso(data.progreso);
+    return true;
+
+  } catch (err) {
+    console.error('Error guardando, usando localStorage:', err);
+    // Fallback a localStorage si hay error de red
+    const clave = `IS_${state.token}_${seccion}`;
+    localStorage.setItem(clave, JSON.stringify(campos));
+    return false;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  CAMPO CHANGE — Autoguardado con debounce
+// ══════════════════════════════════════════════════════════════
+function onCampoChange(grupoId, input, seccion, campo) {
+  // Guardar en estado local
+  state.fields[`${seccion}.${campo}`] = { valor: input.value, estatus: 'answered' };
+
+  // Limpiar estado especial si el usuario empieza a escribir
+  clearStatus(grupoId);
+
+  // Autoguardado con debounce (1.5 segundos de inactividad)
+  clearTimeout(state.guardandoTimer);
+  const saveLabel = document.getElementById(`save-label-${state.currentStep}`);
+  if (saveLabel) saveLabel.textContent = 'Guardando...';
+
+  state.guardandoTimer = setTimeout(async () => {
+    const campos = recopilarSeccion(seccion);
+    await guardarEnBackend(seccion, campos);
+    if (saveLabel) saveLabel.textContent = 'Guardado automáticamente';
+  }, 1500);
+}
+
+// ══════════════════════════════════════════════════════════════
+//  STATUS BUTTONS (No tengo / No aplica / Pendiente)
+// ══════════════════════════════════════════════════════════════
+function setStatus(btn, grupoId, statusType, seccion, campo) {
+  const fg      = document.getElementById(grupoId);
+  const allBtns = fg.querySelectorAll('.status-btn');
+  const isActive = btn.classList.contains('active-' + statusType);
+
+  allBtns.forEach(b => b.classList.remove('active-no-tengo','active-no-aplica','active-pendiente'));
+
+  const badge = document.getElementById('badge-' + grupoId);
+  const input = fg.querySelector('input,select,textarea');
+
+  if (isActive) {
+    // Toggle off
+    delete state.fields[`${seccion}.${campo}`];
+    badge.classList.remove('show','no-tengo','no-aplica','pendiente');
+    badge.textContent = '';
+    if (input) { input.disabled = false; input.style.opacity = '1'; }
+  } else {
+    btn.classList.add('active-' + statusType);
+    state.fields[`${seccion}.${campo}`] = { valor: null, estatus: statusType };
+
+    const labels = { 'no-tengo':'✗ No tengo', 'no-aplica':'— No aplica', 'pendiente':'⏱ Pendiente por enviar' };
+    badge.textContent = labels[statusType] || '';
+    badge.className = `field-status-badge show ${statusType}`;
+
+    if (input && (statusType === 'no-tengo' || statusType === 'no-aplica')) {
+      input.disabled = true; input.style.opacity = '0.4';
+    }
+
+    // Guardar estado especial en backend
+    const campos = {};
+    campos[campo] = { valor: null, estatus: statusType };
+    guardarEnBackend(seccion, campos);
+  }
+}
+
+function clearStatus(grupoId) {
+  const badge = document.getElementById('badge-' + grupoId);
+  if (badge) { badge.classList.remove('show','no-tengo','no-aplica','pendiente'); badge.textContent = ''; }
+  const fg = document.getElementById(grupoId);
+  if (fg) {
+    fg.querySelectorAll('.status-btn').forEach(b => b.classList.remove('active-no-tengo','active-no-aplica','active-pendiente'));
+    const inp = fg.querySelector('input,select,textarea');
+    if (inp) { inp.disabled = false; inp.style.opacity = '1'; }
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  RECOPILAR SECCIÓN DEL FORMULARIO
+// ══════════════════════════════════════════════════════════════
+function recopilarSeccion(seccion) {
+  const campos = {};
+  const fieldState = state.fields;
+
+  Object.entries(fieldState).forEach(([clave, valor]) => {
+    if (clave.startsWith(seccion + '.')) {
+      const campo = clave.replace(seccion + '.', '');
+      campos[campo] = valor;
+    }
+  });
+
+  // También leer inputs directamente (por si no están en state.fields)
+  const inputMap = {
+    generales: {
+      nombre_comercial:'in-nombre', razon_social:'in-razon', rfc:'in-rfc',
+      representante_legal:'in-rep', domicilio:'in-domicilio', municipio:'in-municipio',
+      codigo_postal:'in-cp', telefono:'in-tel', email:'in-email', giro:'in-giro',
+      superficie:'in-superficie', aforo:'in-aforo', trabajadores:'in-trabajadores', horario:'in-horario'
+    },
+    operativa: {
+      actividades:'in-actividades', areas:'in-areas',
+      quimicos:'in-quimicos', instalacion_electrica:'in-electrico'
+    },
+    seguridad: {
+      responsable_seguridad:'in-responsable', telefonos_emergencia:'in-tel-emergencia'
+    }
+  };
+
+  const mapa = inputMap[seccion] || {};
+  Object.entries(mapa).forEach(([clave, inputId]) => {
+    if (campos[clave]) return; // Ya tiene valor del state
+    const el = document.getElementById(inputId);
+    if (el && el.value.trim()) {
+      campos[clave] = { valor: el.value.trim(), estatus: 'answered' };
+    }
+  });
+
+  return campos;
+}
+
+// ══════════════════════════════════════════════════════════════
+//  SUBIR FOTOGRAFÍAS
+// ══════════════════════════════════════════════════════════════
+async function handlePhotoUpload(input, catId) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const prev      = document.getElementById(`photo-prev-${catId}`);
+  const thumb     = document.getElementById(`photo-thumb-${catId}`);
+  const nameEl    = document.getElementById(`photo-name-${catId}`);
+  const uploadZone = document.getElementById(`photo-upload-${catId}`);
+
+  // Vista previa inmediata (UX rápida)
+  const reader = new FileReader();
+  reader.onload = e => {
+    thumb.src = e.target.result;
+    nameEl.textContent = file.name.length > 20 ? file.name.substring(0,18)+'...' : file.name;
+    prev.classList.add('show');
+    uploadZone.style.display = 'none';
+    document.getElementById(`photo-item-${catId}`).classList.add('uploaded');
+  };
+  reader.readAsDataURL(file);
+
+  // Subir al backend en segundo plano
+  if (!state.modoOffline && state.token) {
+    const formData = new FormData();
+    formData.append('archivo', file);
+    formData.append('categoria', catId);
+    formData.append('estatusCampo', 'subido');
+
+    try {
+      await fetch(`${API_URL}/api/archivos/subir/link/${state.token}`, {
+        method: 'POST',
+        body:   formData
+      });
+    } catch (err) {
+      console.error('Error subiendo foto:', err);
+      // La vista previa ya se mostró, el usuario no nota el error
+    }
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  SUBIR DOCUMENTOS
+// ══════════════════════════════════════════════════════════════
+async function subirDocumento(input, categoria, zoneId) {
+  const files = Array.from(input.files);
+  if (!files.length) return;
+
+  const zone = document.getElementById(zoneId);
+  zone.style.borderColor  = 'var(--verde)';
+  zone.style.background   = 'var(--verde-light)';
+  zone.querySelector('.upload-title').textContent = `${files.length} archivo(s) listo(s)`;
+  zone.querySelector('.upload-hint').textContent  = files.map(f=>f.name).join(', ');
+
+  // Subir cada archivo al backend
+  for (const file of files) {
+    if (!state.modoOffline && state.token) {
+      const formData = new FormData();
+      formData.append('archivo', file);
+      formData.append('categoria', categoria);
+      formData.append('estatusCampo', 'subido');
+
+      try {
+        await fetch(`${API_URL}/api/archivos/subir/link/${state.token}`, {
+          method: 'POST', body: formData
+        });
+      } catch (err) {
+        console.error('Error subiendo documento:', err);
+      }
+    }
+  }
+
+  guardarEnBackend('documentos', { [categoria]: { valor: files.map(f=>f.name).join(','), estatus:'answered' } });
+}
+
+// ══════════════════════════════════════════════════════════════
+//  FINALIZAR ENVÍO
+// ══════════════════════════════════════════════════════════════
+async function finalizarEnvio() {
+  // Cambiar estatus del expediente a "listo_para_revision"
+  if (!state.modoOffline && state.token) {
+    try {
+      // Guardar última sección antes de finalizar
+      await guardarEnBackend('documentos', recopilarSeccion('documentos'));
+    } catch (e) {}
+  }
+  goToStep(6);
+}
+
+// ══════════════════════════════════════════════════════════════
+//  RELLENAR FORMULARIO DESDE BD
+// ══════════════════════════════════════════════════════════════
+function rellenarFormularioDesdeBD(datosJson) {
+  if (!datosJson) return;
+
+  const mapInputs = {
+    generales: {
+      nombre_comercial:'in-nombre', razon_social:'in-razon', rfc:'in-rfc',
+      representante_legal:'in-rep', domicilio:'in-domicilio', municipio:'in-municipio',
+      codigo_postal:'in-cp', telefono:'in-tel', email:'in-email', giro:'in-giro',
+      superficie:'in-superficie', aforo:'in-aforo', trabajadores:'in-trabajadores', horario:'in-horario'
+    },
+    operativa: {
+      actividades:'in-actividades', areas:'in-areas',
+      quimicos:'in-quimicos', instalacion_electrica:'in-electrico'
+    },
+    seguridad: {
+      responsable_seguridad:'in-responsable', telefonos_emergencia:'in-tel-emergencia'
+    }
+  };
+
+  Object.entries(mapInputs).forEach(([seccion, mapa]) => {
+    const secData = datosJson[seccion] || {};
+    Object.entries(mapa).forEach(([campo, inputId]) => {
+      const dato = secData[campo];
+      if (!dato) return;
+      const el = document.getElementById(inputId);
+      if (!el) return;
+
+      if (dato.estatus === 'answered' && dato.valor) {
+        el.value = dato.valor;
+        state.fields[`${seccion}.${campo}`] = dato;
+      } else if (['no-tengo','no-aplica','pendiente'].includes(dato.estatus)) {
+        // Restaurar badge de estado especial
+        const grupoId = inputId.replace('in-','fg-').replace('-','fg-');
+        const badge = document.getElementById(`badge-fg-${campo.replace(/_/g,'-')}`);
+        if (badge) {
+          const labels = { 'no-tengo':'✗ No tengo', 'no-aplica':'— No aplica', 'pendiente':'⏱ Pendiente' };
+          badge.textContent = labels[dato.estatus] || '';
+          badge.className = `field-status-badge show ${dato.estatus}`;
+          if (el && (dato.estatus==='no-tengo'||dato.estatus==='no-aplica')) { el.disabled=true; el.style.opacity='0.4'; }
+        }
+      }
+    });
+  });
+}
+
+// ══════════════════════════════════════════════════════════════
+//  PROGRESO
+// ══════════════════════════════════════════════════════════════
+function actualizarProgreso(pct) {
+  state.progreso = pct;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressPct').textContent  = pct + '%';
+}
+
+// ══════════════════════════════════════════════════════════════
+//  PHOTO GRID
+// ══════════════════════════════════════════════════════════════
+function buildPhotoGrid() {
+  const grid = document.getElementById('photo-grid');
+  grid.innerHTML = PHOTO_CATS.map(cat => `
+    <div class="photo-item" id="photo-item-${cat.id}">
+      <div class="photo-item-header">
+        <div class="photo-item-icon">${cat.icon}</div>
+        <div class="photo-item-label">${cat.label}</div>
+      </div>
+      <div class="photo-item-body">
+        <div class="photo-uploaded-preview" id="photo-prev-${cat.id}">
+          <img id="photo-thumb-${cat.id}" src="" alt="">
+          <span id="photo-name-${cat.id}"></span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <label class="photo-mini-upload" id="photo-upload-${cat.id}">
+          <input type="file" accept="image/*" capture="environment" onchange="handlePhotoUpload(this,'${cat.id}')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          Subir foto
+        </label>
+        <div class="status-opts" style="margin-top:6px">
+          <button class="status-btn" style="font-size:11px;padding:3px 8px" onclick="setStatus(this,'photo-item-${cat.id}','no-tengo','fotos','${cat.id}')">No tengo</button>
+          <button class="status-btn" style="font-size:11px;padding:3px 8px" onclick="setStatus(this,'photo-item-${cat.id}','pendiente','fotos','${cat.id}')">Pendiente</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  ARRANCAR
+// ══════════════════════════════════════════════════════════════
+init();
+</script>
+</body>
+</html>
