@@ -631,7 +631,7 @@ const token = partes[partes.length - 1];
 
   // Cargar expediente desde el backend
   try {
-    const resp = await fetch(`${API_URL}/api/expedientes/link/${token}`);
+    const resp = await fetch(`${API_URL}/api/portal/${token}`);
 
     if (!resp.ok) {
       mostrarStep('step-loading', 'step-error');
@@ -721,7 +721,7 @@ async function guardarEnBackend(seccion, campos) {
   }
 
   try {
-    const resp = await fetch(`${API_URL}/api/expedientes/link/${state.token}/datos`, {
+    const resp = await fetch(`${API_URL}/api/portal/${state.token}/datos`, {
       method:  'PUT',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ seccion, campos })
@@ -888,7 +888,7 @@ async function handlePhotoUpload(input, catId) {
     formData.append('estatusCampo', 'subido');
 
     try {
-      await fetch(`${API_URL}/api/archivos/subir/link/${state.token}`, {
+      await fetch(`${API_URL}/api/portal/${state.token}`, {
         method: 'POST',
         body:   formData
       });
@@ -921,7 +921,7 @@ async function subirDocumento(input, categoria, zoneId) {
       formData.append('estatusCampo', 'subido');
 
       try {
-        await fetch(`${API_URL}/api/archivos/subir/link/${state.token}`, {
+        await fetch(`${API_URL}/api/portal/${state.token}`, {
           method: 'POST', body: formData
         });
       } catch (err) {
