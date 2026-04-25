@@ -64,7 +64,9 @@ app.get('/', (req, res) => {
     portal: '/portal/TOKEN_DEL_CLIENTE'
   });
 });
-
+app.get('/panel', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'panel-interno-conectado.html'));
+});
 app.get('/portal/*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'portal-cliente-conectado.html'));
 });
