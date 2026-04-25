@@ -888,7 +888,7 @@ async function handlePhotoUpload(input, catId) {
     formData.append('estatusCampo', 'subido');
 
     try {
-      await fetch(`${API_URL}/api/portal/${state.token}`, {
+      await fetch(`${API_URL}/api/portal/${state.token}/archivo`, {
         method: 'POST',
         body:   formData
       });
@@ -921,7 +921,7 @@ async function subirDocumento(input, categoria, zoneId) {
       formData.append('estatusCampo', 'subido');
 
       try {
-        await fetch(`${API_URL}/api/portal/${state.token}`, {
+        await fetch(`${API_URL}/api/portal/${state.token}/archivo`, {
           method: 'POST', body: formData
         });
       } catch (err) {
