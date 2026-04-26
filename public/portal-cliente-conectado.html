@@ -6,11 +6,7 @@
 <title>Industria Segura MM — Portal del Cliente</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
 
-<!-- ════════════════════════════════════════════════════════════
-     CONFIGURACIÓN — Cambia esta URL por la de tu backend
-     ════════════════════════════════════════════════════════════ -->
 <script>
-  // ⚠️ IMPORTANTE: Cambia esta URL cuando despliegues en Railway
   const API_URL = 'https://industria-segura-backend-production.up.railway.app';
 </script>
 <style>
@@ -25,7 +21,6 @@
   * { margin:0; padding:0; box-sizing:border-box; }
   body { font-family:'DM Sans',sans-serif; background:var(--blanco); color:var(--negro); min-height:100vh; }
 
-  /* HEADER */
   .header { background:var(--negro); padding:0 24px; display:flex; align-items:center; justify-content:space-between; height:64px; position:sticky; top:0; z-index:100; border-bottom:3px solid var(--rojo); }
   .logo { display:flex; align-items:center; gap:10px; }
   .logo-icon { width:36px; height:36px; background:var(--rojo); border-radius:6px; display:flex; align-items:center; justify-content:center; font-family:'Syne',sans-serif; font-weight:800; color:white; font-size:16px; letter-spacing:-1px; }
@@ -34,7 +29,6 @@
   .badge-folio { background:var(--gris-oscuro); border:1px solid #444; border-radius:20px; padding:4px 12px; font-size:12px; color:#aaa; }
   .badge-folio strong { color:white; }
 
-  /* PROGRESS */
   .progress-wrapper { background:white; border-bottom:1px solid var(--borde); padding:16px 24px; position:sticky; top:64px; z-index:99; box-shadow:0 2px 8px rgba(0,0,0,0.05); }
   .progress-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
   .progress-label { font-family:'Syne',sans-serif; font-weight:600; font-size:13px; color:var(--gris-oscuro); }
@@ -44,24 +38,36 @@
   .steps-nav { display:flex; gap:8px; margin-top:12px; overflow-x:auto; scrollbar-width:none; padding-bottom:2px; }
   .steps-nav::-webkit-scrollbar { display:none; }
   .step-pill { flex-shrink:0; display:flex; align-items:center; gap:6px; padding:5px 10px; border-radius:20px; font-size:12px; font-weight:500; cursor:pointer; border:1.5px solid transparent; transition:all 0.2s; white-space:nowrap; }
-  .step-pill.done { background:var(--verde-light); color:var(--verde); border-color:var(--verde); }
-  .step-pill.active { background:var(--rojo); color:white; border-color:var(--rojo); }
-  .step-pill.pending { background:var(--gris-claro); color:var(--gris-medio); border-color:var(--borde); }
+  .step-pill.done { background:var(--verde-light); color:var(--verde); border-color:var(--verde); cursor:pointer; }
+  .step-pill.done:hover { background:var(--verde); color:white; }
+  .step-pill.active { background:var(--rojo); color:white; border-color:var(--rojo); cursor:default; }
+  .step-pill.pending { background:var(--gris-claro); color:var(--gris-medio); border-color:var(--borde); cursor:not-allowed; opacity:0.6; }
   .step-pill .dot { width:7px; height:7px; border-radius:50%; background:currentColor; opacity:0.7; }
+  .step-pill.done .dot::after { content:'✓'; font-size:8px; display:flex; align-items:center; justify-content:center; }
 
-  /* MAIN */
+  /* BRIGADA PRIVACY TOGGLE */
+  .brigada-privacy { display:flex; align-items:center; justify-content:space-between; padding:8px 14px; background:var(--gris-claro); border-top:1px solid var(--borde); }
+  .brigada-privacy-label { font-size:11px; color:var(--gris-medio); display:flex; align-items:center; gap:6px; }
+  .privacy-toggle { position:relative; display:inline-flex; align-items:center; cursor:pointer; gap:7px; user-select:none; }
+  .privacy-toggle input { display:none; }
+  .privacy-track { width:34px; height:18px; background:var(--borde); border-radius:99px; transition:background 0.2s; flex-shrink:0; position:relative; }
+  .privacy-track::after { content:''; position:absolute; left:2px; top:2px; width:14px; height:14px; background:white; border-radius:50%; transition:transform 0.2s; box-shadow:0 1px 3px rgba(0,0,0,0.2); }
+  .privacy-toggle input:checked + .privacy-track { background:var(--rojo); }
+  .privacy-toggle input:checked + .privacy-track::after { transform:translateX(16px); }
+  .privacy-toggle-label { font-size:11px; color:var(--gris-medio); white-space:nowrap; }
+  .brigada-fields-wrapper { transition:opacity 0.2s; }
+  .brigada-fields-wrapper.hidden { opacity:0.3; pointer-events:none; }
+
   .main { max-width:720px; margin:0 auto; padding:32px 20px 80px; }
   .section-card { display:none; animation:fadeUp 0.4s ease forwards; }
   .section-card.active { display:block; }
   @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
 
-  /* SECTION HEADER */
   .section-tag { display:inline-block; background:var(--rojo); color:white; font-family:'Syne',sans-serif; font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; padding:3px 10px; border-radius:4px; margin-bottom:10px; }
   .section-title { font-family:'Syne',sans-serif; font-weight:800; font-size:26px; line-height:1.2; color:var(--negro); margin-bottom:8px; }
   .section-desc { font-size:14px; color:var(--gris-medio); line-height:1.6; }
   .section-header { margin-bottom:28px; }
 
-  /* FIELDS */
   .field-group { margin-bottom:20px; }
   .field-label { font-family:'Syne',sans-serif; font-weight:600; font-size:13px; color:var(--gris-oscuro); margin-bottom:8px; display:flex; align-items:center; gap:6px; }
   .field-label .req { color:var(--rojo); font-size:14px; }
@@ -74,7 +80,6 @@
   .field-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
   @media(max-width:480px){ .field-row { grid-template-columns:1fr; } }
 
-  /* STATUS OPTIONS */
   .status-opts { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
   .status-btn { display:flex; align-items:center; gap:5px; padding:5px 11px; border-radius:20px; font-size:12px; font-weight:500; cursor:pointer; border:1.5px solid var(--borde); background:white; color:var(--gris-medio); transition:all 0.15s; user-select:none; }
   .status-btn svg { width:13px; height:13px; flex-shrink:0; }
@@ -87,7 +92,6 @@
   .field-status-badge.no-aplica { background:var(--azul-light); color:var(--azul); }
   .field-status-badge.pendiente { background:var(--amarillo-light); color:var(--amarillo); }
 
-  /* UPLOAD */
   .upload-zone { border:2px dashed var(--borde); border-radius:12px; padding:24px; text-align:center; cursor:pointer; transition:all 0.2s; background:var(--gris-claro); position:relative; }
   .upload-zone:hover { border-color:var(--rojo); background:var(--rojo-light); }
   .upload-zone input { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
@@ -95,7 +99,17 @@
   .upload-title { font-family:'Syne',sans-serif; font-weight:600; font-size:14px; color:var(--gris-oscuro); margin-bottom:4px; }
   .upload-hint { font-size:12px; color:#aaa; }
 
-  /* PHOTO GRID */
+  /* LOGOTIPO UPLOAD */
+  .logo-upload-zone { border:2px dashed var(--borde); border-radius:12px; padding:20px; display:flex; align-items:center; gap:16px; cursor:pointer; transition:all 0.2s; background:var(--gris-claro); position:relative; }
+  .logo-upload-zone:hover { border-color:var(--rojo); background:var(--rojo-light); }
+  .logo-upload-zone input { position:absolute; inset:0; opacity:0; cursor:pointer; }
+  .logo-preview { width:64px; height:64px; border-radius:10px; background:white; border:1px solid var(--borde); display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; }
+  .logo-preview img { width:100%; height:100%; object-fit:contain; display:none; }
+  .logo-preview-placeholder { font-size:24px; }
+  .logo-upload-text { flex:1; }
+  .logo-upload-text strong { display:block; font-family:'Syne',sans-serif; font-weight:600; font-size:14px; color:var(--gris-oscuro); margin-bottom:4px; }
+  .logo-upload-text span { font-size:12px; color:#aaa; }
+
   .photo-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
   @media(max-width:480px){ .photo-grid { grid-template-columns:1fr; } }
   .photo-item { border:1.5px solid var(--borde); border-radius:12px; overflow:hidden; background:white; transition:border-color 0.2s; }
@@ -112,26 +126,48 @@
   .photo-uploaded-preview img { width:36px; height:36px; border-radius:5px; object-fit:cover; }
   .photo-uploaded-preview span { font-size:11px; color:var(--verde); font-weight:500; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
-  /* MISC */
+  /* BRIGADA CARDS */
+  .brigada-grid { display:flex; flex-direction:column; gap:12px; }
+  .brigada-card { border:1.5px solid var(--borde); border-radius:12px; overflow:hidden; background:white; }
+  .brigada-card-header { padding:10px 14px; background:var(--gris-claro); display:flex; align-items:center; gap:10px; border-bottom:1px solid var(--borde); }
+  .brigada-card-icon { width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; }
+  .brigada-card-icon.presidente { background:#FFF0E0; }
+  .brigada-card-icon.secretario { background:#E8F0FF; }
+  .brigada-card-icon.suplente   { background:#F0E8FF; }
+  .brigada-card-icon.director   { background:#E0F5E8; }
+  .brigada-card-icon.incendios  { background:#FFE8E8; }
+  .brigada-card-icon.evacuacion { background:#FFF5E0; }
+  .brigada-card-icon.auxilios   { background:#E8FFF0; }
+  .brigada-card-icon.rescate    { background:#E8F8FF; }
+  .brigada-card-title { font-family:'Syne',sans-serif; font-weight:700; font-size:13px; color:var(--gris-oscuro); }
+  .brigada-card-body { padding:12px 14px; display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  @media(max-width:480px){ .brigada-card-body { grid-template-columns:1fr; } }
+  .brigada-subfield label { font-size:11px; font-weight:600; color:#aaa; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:5px; }
+
   .divider { height:1px; background:var(--borde); margin:28px 0; }
   .subsection-title { font-family:'Syne',sans-serif; font-weight:700; font-size:14px; color:var(--gris-oscuro); margin-bottom:16px; display:flex; align-items:center; gap:8px; }
   .subsection-title::before { content:''; width:4px; height:16px; background:var(--rojo); border-radius:2px; display:inline-block; }
-  .check-group { display:flex; flex-direction:column; gap:8px; }
-  .check-item { display:flex; align-items:center; gap:10px; padding:10px 14px; border:1.5px solid var(--borde); border-radius:10px; cursor:pointer; transition:all 0.15s; user-select:none; }
-  .check-item:hover { border-color:var(--rojo); background:var(--rojo-light); }
-  .check-item input { display:none; }
-  .check-box { width:18px; height:18px; border:2px solid var(--borde); border-radius:5px; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all 0.15s; background:white; }
-  .check-item input:checked ~ .check-box { background:var(--rojo); border-color:var(--rojo); }
-  .check-item input:checked ~ .check-box::after { content:''; width:4px; height:8px; border:2px solid white; border-top:none; border-left:none; transform:rotate(45deg) translateY(-1px); display:block; }
-  .check-label { font-size:14px; color:var(--gris-medio); }
-  .check-item input:checked ~ .check-label { color:var(--negro); font-weight:500; }
-  .counter-input { display:flex; align-items:center; border:1.5px solid var(--borde); border-radius:10px; overflow:hidden; width:fit-content; }
-  .counter-btn { width:40px; height:44px; background:var(--gris-claro); border:none; font-size:20px; cursor:pointer; color:var(--gris-oscuro); display:flex; align-items:center; justify-content:center; transition:background 0.15s; user-select:none; }
-  .counter-btn:hover { background:var(--borde); }
-  .counter-val { min-width:56px; height:44px; display:flex; align-items:center; justify-content:center; font-family:'Syne',sans-serif; font-weight:700; font-size:18px; color:var(--negro); border-left:1px solid var(--borde); border-right:1px solid var(--borde); }
   .field-hint { font-size:12px; color:#aaa; margin-top:5px; line-height:1.4; }
 
-  /* NAV BUTTONS */
+  /* DOC GRID */
+  .doc-grid { display:flex; flex-direction:column; gap:10px; }
+  .doc-item { border:1.5px solid var(--borde); border-radius:10px; overflow:hidden; background:white; }
+  .doc-item.uploaded { border-color:var(--verde); }
+  .doc-item-header { padding:10px 14px; display:flex; align-items:center; justify-content:space-between; }
+  .doc-item-left { display:flex; align-items:center; gap:10px; }
+  .doc-item-icon { width:32px; height:32px; border-radius:8px; background:var(--rojo-light); display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
+  .doc-item-label { font-size:13px; font-weight:500; color:var(--gris-oscuro); }
+  .doc-item-opt { font-size:10px; color:#aaa; font-weight:400; display:block; margin-top:1px; }
+  .doc-item-actions { display:flex; align-items:center; gap:6px; }
+  .doc-upload-btn { display:flex; align-items:center; gap:5px; padding:5px 10px; border:1.5px solid var(--rojo); border-radius:8px; font-size:12px; font-weight:500; color:var(--rojo); cursor:pointer; position:relative; background:var(--rojo-light); transition:all 0.15s; }
+  .doc-upload-btn:hover { background:var(--rojo); color:white; }
+  .doc-upload-btn input { position:absolute; inset:0; opacity:0; cursor:pointer; }
+  .doc-status-tag { font-size:11px; padding:3px 8px; border-radius:6px; font-weight:500; }
+  .doc-status-tag.subido    { background:var(--verde-light); color:var(--verde); }
+  .doc-status-tag.pendiente { background:var(--amarillo-light); color:var(--amarillo); }
+  .doc-status-tag.no-aplica { background:var(--azul-light); color:var(--azul); }
+  .doc-item-status-opts { padding:0 14px 10px; display:flex; gap:6px; }
+
   .nav-buttons { display:flex; justify-content:space-between; align-items:center; margin-top:36px; gap:12px; }
   .btn { padding:13px 24px; border-radius:10px; font-family:'Syne',sans-serif; font-weight:700; font-size:14px; cursor:pointer; border:none; display:flex; align-items:center; gap:8px; transition:all 0.2s; }
   .btn-primary { background:var(--rojo); color:white; flex:1; justify-content:center; max-width:260px; }
@@ -139,16 +175,11 @@
   .btn-primary:disabled { opacity:0.6; cursor:not-allowed; transform:none; box-shadow:none; }
   .btn-secondary { background:white; color:var(--gris-oscuro); border:1.5px solid var(--borde); }
   .btn-ghost { background:transparent; color:var(--gris-medio); border:none; padding:13px 8px; font-size:13px; }
-
-  /* SAVE INDICATOR */
   .save-indicator { display:flex; align-items:center; gap:6px; font-size:12px; color:#aaa; }
   .save-dot { width:6px; height:6px; border-radius:50%; background:var(--verde); animation:pulse 2s infinite; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-
-  /* INFO BANNER */
   .info-banner { background:var(--azul-light); border:1px solid #C0D4F0; border-radius:10px; padding:12px 16px; font-size:13px; color:var(--azul); display:flex; gap:10px; align-items:flex-start; margin-bottom:20px; }
 
-  /* WELCOME */
   .welcome-screen { text-align:center; padding:40px 0; }
   .welcome-emblem { width:80px; height:80px; background:var(--negro); border-radius:20px; display:flex; align-items:center; justify-content:center; margin:0 auto 24px; font-family:'Syne',sans-serif; font-weight:800; font-size:28px; color:var(--rojo); letter-spacing:-2px; border:3px solid var(--rojo); }
   .welcome-title { font-family:'Syne',sans-serif; font-weight:800; font-size:28px; line-height:1.2; margin-bottom:12px; }
@@ -159,7 +190,6 @@
   .welcome-step-text { font-size:13px; color:var(--gris-oscuro); line-height:1.5; }
   .welcome-step-text strong { display:block; font-weight:600; color:var(--negro); margin-bottom:2px; }
 
-  /* SUCCESS */
   .success-screen { text-align:center; padding:60px 0; }
   .success-icon { width:80px; height:80px; background:var(--verde-light); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 24px; border:3px solid var(--verde); }
   .success-title { font-family:'Syne',sans-serif; font-weight:800; font-size:26px; color:var(--negro); margin-bottom:10px; }
@@ -170,18 +200,9 @@
   .success-detail-row .key { color:var(--gris-medio); }
   .success-detail-row .val { font-weight:600; color:var(--negro); }
 
-  /* EXTINTOR */
-  .extintor-row { display:grid; grid-template-columns:1fr 1fr auto; gap:10px; align-items:end; margin-bottom:10px; }
-  .remove-row { width:40px; height:44px; display:flex; align-items:center; justify-content:center; background:var(--rojo-light); border:1.5px solid var(--rojo); border-radius:10px; cursor:pointer; color:var(--rojo); font-size:18px; transition:all 0.15s; }
-  .remove-row:hover { background:var(--rojo); color:white; }
-  .add-row-btn { display:flex; align-items:center; gap:6px; font-size:13px; font-weight:500; color:var(--rojo); cursor:pointer; padding:6px 0; border:none; background:none; font-family:'DM Sans',sans-serif; }
-
-  /* ERROR SCREEN */
   .error-screen { text-align:center; padding:80px 20px; }
   .error-title { font-family:'Syne',sans-serif; font-weight:800; font-size:24px; color:var(--negro); margin-bottom:10px; }
   .error-sub { font-size:14px; color:var(--gris-medio); line-height:1.6; }
-
-  /* LOADING */
   .loading-screen { text-align:center; padding:80px 20px; }
   .spinner { width:40px; height:40px; border:3px solid var(--borde); border-top-color:var(--rojo); border-radius:50%; animation:spin 0.8s linear infinite; margin:0 auto 20px; }
   @keyframes spin { to { transform:rotate(360deg); } }
@@ -197,39 +218,31 @@
 </head>
 <body>
 
-<!-- HEADER -->
 <header class="header">
   <div class="logo">
     <div class="logo-icon">IS</div>
-    <div class="logo-text">
-      Industria Segura MM
-      <span>Portal del Cliente</span>
-    </div>
+    <div class="logo-text">Industria Segura MM<span>Portal del Cliente</span></div>
   </div>
   <div class="badge-folio">Folio <strong id="folioNum">Cargando...</strong></div>
 </header>
 
-<!-- PROGRESS -->
 <div class="progress-wrapper">
   <div class="progress-header">
     <span class="progress-label" id="progressLabel">Cargando...</span>
     <span class="progress-pct" id="progressPct">0%</span>
   </div>
-  <div class="progress-bar-bg">
-    <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
-  </div>
+  <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
   <div class="steps-nav" id="stepsNav">
-    <div class="step-pill active" data-step="0"><div class="dot"></div>Inicio</div>
+    <div class="step-pill active"  data-step="0"><div class="dot"></div>Inicio</div>
     <div class="step-pill pending" data-step="1"><div class="dot"></div>Datos generales</div>
     <div class="step-pill pending" data-step="2"><div class="dot"></div>Operación</div>
-    <div class="step-pill pending" data-step="3"><div class="dot"></div>Seguridad</div>
+    <div class="step-pill pending" data-step="3"><div class="dot"></div>Brigadas</div>
     <div class="step-pill pending" data-step="4"><div class="dot"></div>Fotografías</div>
     <div class="step-pill pending" data-step="5"><div class="dot"></div>Documentos</div>
     <div class="step-pill pending" data-step="6"><div class="dot"></div>Listo</div>
   </div>
 </div>
 
-<!-- MAIN -->
 <main class="main">
 
   <!-- CARGANDO -->
@@ -240,13 +253,13 @@
     </div>
   </div>
 
-  <!-- ERROR DE LINK -->
+  <!-- ERROR -->
   <div class="section-card" id="step-error">
     <div class="error-screen">
       <div style="font-size:48px;margin-bottom:16px">⚠️</div>
       <div class="error-title">Link inválido o expirado</div>
       <div class="error-sub">Este link no existe o ya no está disponible.<br>Contacta a Industria Segura MM para obtener un nuevo link.</div>
-      <div style="margin-top:24px;font-size:13px;color:var(--gris-medio)">WhatsApp: <strong>81XXXXXXXX</strong></div>
+      <div style="margin-top:24px;font-size:13px;color:var(--gris-medio)">Tel: <strong>818-077-0841</strong></div>
     </div>
   </div>
 
@@ -257,14 +270,14 @@
       <h1 class="welcome-title">Bienvenido a tu portal de<br>Protección Civil</h1>
       <p class="welcome-sub">Aquí capturarás la información de tu negocio para que nuestro equipo elabore tu Plan de Contingencia personalizado.</p>
       <div class="welcome-steps">
-        <div class="welcome-step-item"><div class="welcome-step-num">1</div><div class="welcome-step-text"><strong>Llena los datos de tu establecimiento</strong>Nombre, domicilio, aforo, giro y datos del representante legal.</div></div>
-        <div class="welcome-step-item"><div class="welcome-step-num">2</div><div class="welcome-step-text"><strong>Comparte tu información operativa</strong>Actividades, equipos, sustancias y turnos de trabajo.</div></div>
-        <div class="welcome-step-item"><div class="welcome-step-num">3</div><div class="welcome-step-text"><strong>Registra tu equipo de seguridad</strong>Extintores, señalamientos, rutas de evacuación y brigadas.</div></div>
-        <div class="welcome-step-item"><div class="welcome-step-num">4</div><div class="welcome-step-text"><strong>Sube fotografías y documentos</strong>Fachada, extintores, señalización y documentos del negocio.</div></div>
+        <div class="welcome-step-item"><div class="welcome-step-num">1</div><div class="welcome-step-text"><strong>Datos generales y del inmueble</strong>Nombre, domicilio, superficies, aforo, giro y logotipo.</div></div>
+        <div class="welcome-step-item"><div class="welcome-step-num">2</div><div class="welcome-step-text"><strong>Información operativa</strong>Actividades, servicios, áreas, equipos y sustancias peligrosas.</div></div>
+        <div class="welcome-step-item"><div class="welcome-step-num">3</div><div class="welcome-step-text"><strong>Brigadas de emergencia</strong>Los 8 roles de tu equipo de protección civil con nombre y teléfono.</div></div>
+        <div class="welcome-step-item"><div class="welcome-step-num">4</div><div class="welcome-step-text"><strong>Fotos y documentos</strong>Evidencia fotográfica y documentos del establecimiento.</div></div>
       </div>
       <div class="info-banner">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        <div>Si no tienes algún dato o archivo, puedes marcarlo como <strong>"No tengo"</strong>, <strong>"No aplica"</strong> o <strong>"Pendiente por enviar"</strong> y continuar sin problema.</div>
+        <div>Si no tienes algún dato o archivo, puedes marcarlo como <strong>"No tengo"</strong>, <strong>"No aplica"</strong> o <strong>"Pendiente"</strong> y continuar sin problema.</div>
       </div>
       <button class="btn btn-primary" style="margin:0 auto" onclick="goToStep(1)">
         Comenzar captura
@@ -273,14 +286,33 @@
     </div>
   </div>
 
-  <!-- STEP 1: DATOS GENERALES -->
+  <!-- ═══════════════════════════════════════════════════════
+       STEP 1: DATOS GENERALES (AMPLIADO)
+       ═══════════════════════════════════════════════════════ -->
   <div class="section-card" id="step-1">
     <div class="section-header">
       <div class="section-tag">Sección A</div>
       <h2 class="section-title">Datos generales del establecimiento</h2>
       <p class="section-desc">Información básica de identificación de tu negocio.</p>
     </div>
-    <div class="subsection-title">Identificación del negocio</div>
+
+    <!-- LOGOTIPO -->
+    <div class="subsection-title">Identidad del negocio</div>
+    <div class="field-group" id="fg-logotipo">
+      <div class="field-label">Logotipo del establecimiento <span class="opt">(opcional)</span></div>
+      <div class="logo-upload-zone" id="logo-upload-zone" onclick="document.getElementById('logo-file-input').click()">
+        <input type="file" id="logo-file-input" accept="image/*" style="display:none" onchange="handleLogoUpload(this)">
+        <div class="logo-preview" id="logo-preview">
+          <span class="logo-preview-placeholder">🏢</span>
+          <img id="logo-preview-img" src="" alt="Logotipo">
+        </div>
+        <div class="logo-upload-text">
+          <strong>Subir logotipo</strong>
+          <span>PNG, JPG o SVG · Máx. 5 MB</span>
+        </div>
+      </div>
+    </div>
+
     <div class="field-group" id="fg-nombre">
       <div class="field-label">Nombre comercial <span class="req">*</span></div>
       <input class="field-input" id="in-nombre" type="text" placeholder="Ej. Restaurante La Casona" oninput="onCampoChange('fg-nombre',this,'generales','nombre_comercial')">
@@ -314,6 +346,7 @@
       </div>
       <div class="field-status-badge" id="badge-fg-rep"></div>
     </div>
+
     <div class="divider"></div>
     <div class="subsection-title">Ubicación y contacto</div>
     <div class="field-group" id="fg-domicilio">
@@ -355,6 +388,7 @@
         <div class="field-status-badge" id="badge-fg-email"></div>
       </div>
     </div>
+
     <div class="divider"></div>
     <div class="subsection-title">Características del inmueble</div>
     <div class="field-group" id="fg-giro">
@@ -369,15 +403,30 @@
       </select>
       <div class="field-status-badge" id="badge-fg-giro"></div>
     </div>
+
+    <!-- METROS CUADRADOS SEPARADOS -->
     <div class="field-row">
-      <div class="field-group" id="fg-superficie">
-        <div class="field-label">Superficie del inmueble</div>
-        <input class="field-input" id="in-superficie" type="text" placeholder="Ej. 250 m²" oninput="onCampoChange('fg-superficie',this,'generales','superficie')">
+      <div class="field-group" id="fg-m2-terreno">
+        <div class="field-label">M² de terreno</div>
+        <input class="field-input" id="in-m2-terreno" type="text" inputmode="decimal" placeholder="Ej. 300" oninput="onCampoChange('fg-m2-terreno',this,'generales','m2_terreno')">
+        <div class="field-hint">Superficie total del predio</div>
         <div class="status-opts">
-          <button class="status-btn" onclick="setStatus(this,'fg-superficie','no-tengo','generales','superficie')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>No tengo</button>
+          <button class="status-btn" onclick="setStatus(this,'fg-m2-terreno','no-tengo','generales','m2_terreno')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>No tengo</button>
         </div>
-        <div class="field-status-badge" id="badge-fg-superficie"></div>
+        <div class="field-status-badge" id="badge-fg-m2-terreno"></div>
       </div>
+      <div class="field-group" id="fg-m2-construccion">
+        <div class="field-label">M² de construcción</div>
+        <input class="field-input" id="in-m2-construccion" type="text" inputmode="decimal" placeholder="Ej. 200" oninput="onCampoChange('fg-m2-construccion',this,'generales','m2_construccion')">
+        <div class="field-hint">Área construida / techada</div>
+        <div class="status-opts">
+          <button class="status-btn" onclick="setStatus(this,'fg-m2-construccion','no-tengo','generales','m2_construccion')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>No tengo</button>
+        </div>
+        <div class="field-status-badge" id="badge-fg-m2-construccion"></div>
+      </div>
+    </div>
+
+    <div class="field-row">
       <div class="field-group" id="fg-aforo">
         <div class="field-label">Aforo máximo</div>
         <input class="field-input" id="in-aforo" type="text" inputmode="numeric" placeholder="Número de personas" oninput="onCampoChange('fg-aforo',this,'generales','aforo')">
@@ -386,19 +435,29 @@
         </div>
         <div class="field-status-badge" id="badge-fg-aforo"></div>
       </div>
-    </div>
-    <div class="field-row">
       <div class="field-group" id="fg-trabajadores">
-        <div class="field-label">Número de trabajadores</div>
+        <div class="field-label">Número de trabajadores <span class="req">*</span></div>
         <input class="field-input" id="in-trabajadores" type="text" inputmode="numeric" placeholder="Total de empleados" oninput="onCampoChange('fg-trabajadores',this,'generales','trabajadores')">
         <div class="field-status-badge" id="badge-fg-trabajadores"></div>
       </div>
-      <div class="field-group" id="fg-horario">
-        <div class="field-label">Horario de operación</div>
-        <input class="field-input" id="in-horario" type="text" placeholder="Ej. Lun-Vie 9:00-18:00" oninput="onCampoChange('fg-horario',this,'generales','horario')">
-        <div class="field-status-badge" id="badge-fg-horario"></div>
-      </div>
     </div>
+
+    <div class="field-group" id="fg-horario">
+      <div class="field-label">Horario de operación <span class="req">*</span></div>
+      <input class="field-input" id="in-horario" type="text" placeholder="Ej. Lun-Vie 9:00-18:00, Sáb 9:00-14:00" oninput="onCampoChange('fg-horario',this,'generales','horario')">
+      <div class="field-status-badge" id="badge-fg-horario"></div>
+    </div>
+
+    <!-- SERVICIOS -->
+    <div class="field-group" id="fg-servicios">
+      <div class="field-label">Servicios con que cuenta el establecimiento</div>
+      <textarea class="field-input" id="in-servicios" placeholder="Ej. Agua potable, drenaje, gas LP, energía eléctrica, internet, aire acondicionado..." oninput="onCampoChange('fg-servicios',this,'generales','servicios')"></textarea>
+      <div class="status-opts">
+        <button class="status-btn" onclick="setStatus(this,'fg-servicios','pendiente','generales','servicios')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>Pendiente</button>
+      </div>
+      <div class="field-status-badge" id="badge-fg-servicios"></div>
+    </div>
+
     <div class="nav-buttons">
       <button class="btn btn-ghost" onclick="goToStep(0)">← Atrás</button>
       <div class="save-indicator"><div class="save-dot"></div><span id="save-label-1">Guardado automáticamente</span></div>
@@ -408,13 +467,16 @@
     </div>
   </div>
 
-  <!-- STEP 2: OPERATIVA (simplificado) -->
+  <!-- ═══════════════════════════════════════════════════════
+       STEP 2: OPERATIVA (AMPLIADO)
+       ═══════════════════════════════════════════════════════ -->
   <div class="section-card" id="step-2">
     <div class="section-header">
       <div class="section-tag">Sección B</div>
       <h2 class="section-title">Información operativa</h2>
       <p class="section-desc">Describe cómo funciona tu negocio y qué instalaciones tienes.</p>
     </div>
+
     <div class="field-group" id="fg-actividades">
       <div class="field-label">Actividades principales <span class="req">*</span></div>
       <textarea class="field-input" id="in-actividades" placeholder="Venta de alimentos, atención médica, almacenamiento de mercancía..." oninput="onCampoChange('fg-actividades',this,'operativa','actividades')"></textarea>
@@ -423,22 +485,27 @@
       </div>
       <div class="field-status-badge" id="badge-fg-actividades"></div>
     </div>
+
     <div class="field-group" id="fg-areas">
-      <div class="field-label">Áreas del inmueble</div>
-      <textarea class="field-input" id="in-areas" placeholder="Cocina, comedor, bodegas, baños, oficina..." oninput="onCampoChange('fg-areas',this,'operativa','areas')"></textarea>
+      <div class="field-label">Áreas y equipo existente</div>
+      <textarea class="field-input" id="in-areas" placeholder="Cocina con estufa industrial, comedor con 10 mesas, bodega de insumos, baños, oficina administrativa..." oninput="onCampoChange('fg-areas',this,'operativa','areas')"></textarea>
+      <div class="field-hint">Describe cada área y el equipo o maquinaria principal que contiene.</div>
       <div class="status-opts">
         <button class="status-btn" onclick="setStatus(this,'fg-areas','no-tengo','operativa','areas')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>No tengo</button>
       </div>
       <div class="field-status-badge" id="badge-fg-areas"></div>
     </div>
+
     <div class="field-group" id="fg-quimicos">
-      <div class="field-label">Sustancias químicas o peligrosas</div>
-      <textarea class="field-input" id="in-quimicos" style="min-height:70px" placeholder="Cloro, thinner, gas LP, refrigerantes... Si no maneja ninguna, escribe 'Ninguna'" oninput="onCampoChange('fg-quimicos',this,'operativa','quimicos')"></textarea>
+      <div class="field-label">Sustancias químicas o peligrosas que se manejan</div>
+      <textarea class="field-input" id="in-quimicos" style="min-height:80px" placeholder="Cloro, thinner, gas LP, refrigerantes, solventes... Si no maneja ninguna, escribe 'Ninguna'" oninput="onCampoChange('fg-quimicos',this,'operativa','quimicos')"></textarea>
+      <div class="field-hint">Incluye nombre de la sustancia y cantidad aproximada que se almacena.</div>
       <div class="status-opts">
         <button class="status-btn" onclick="setStatus(this,'fg-quimicos','no-aplica','operativa','quimicos')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>No aplica</button>
       </div>
       <div class="field-status-badge" id="badge-fg-quimicos"></div>
     </div>
+
     <div class="field-group" id="fg-electrico">
       <div class="field-label">Estado de instalaciones eléctricas</div>
       <select class="field-input" id="in-electrico" onchange="onCampoChange('fg-electrico',this,'operativa','instalacion_electrica')">
@@ -450,6 +517,7 @@
       </select>
       <div class="field-status-badge" id="badge-fg-electrico"></div>
     </div>
+
     <div class="nav-buttons">
       <button class="btn btn-secondary" onclick="goToStep(1)">← Atrás</button>
       <div class="save-indicator"><div class="save-dot"></div><span id="save-label-2">Guardado</span></div>
@@ -459,40 +527,259 @@
     </div>
   </div>
 
-  <!-- STEP 3: SEGURIDAD -->
+  <!-- ═══════════════════════════════════════════════════════
+       STEP 3: BRIGADAS (NUEVO — 8 ROLES CON TELÉFONO)
+       ═══════════════════════════════════════════════════════ -->
   <div class="section-card" id="step-3">
     <div class="section-header">
       <div class="section-tag">Sección C</div>
-      <h2 class="section-title">Seguridad y emergencias</h2>
-      <p class="section-desc">¿Con qué equipo de seguridad cuenta tu negocio?</p>
+      <h2 class="section-title">Brigadas y equipo de emergencia</h2>
+      <p class="section-desc">Registra el personal responsable de cada función de protección civil. Si un rol no aplica o no está asignado, puedes dejarlo vacío.</p>
     </div>
-    <div class="field-group" id="fg-responsable">
-      <div class="field-label">Responsable de seguridad</div>
-      <input class="field-input" id="in-responsable" type="text" placeholder="Persona encargada de emergencias" oninput="onCampoChange('fg-responsable',this,'seguridad','responsable_seguridad')">
-      <div class="status-opts">
-        <button class="status-btn" onclick="setStatus(this,'fg-responsable','no-tengo','seguridad','responsable_seguridad')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>No tengo</button>
-        <button class="status-btn" onclick="setStatus(this,'fg-responsable','pendiente','seguridad','responsable_seguridad')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>Pendiente</button>
+
+    <div class="info-banner">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <div>Una persona puede tener más de un rol. Escribe el nombre y teléfono de cada brigadista. Los campos opcionales puedes dejarlos vacíos.</div>
+    </div>
+
+    <div class="brigada-grid">
+
+      <!-- PRESIDENTE -->
+      <div class="brigada-card">
+        <div class="brigada-card-header">
+          <div class="brigada-card-icon presidente">👤</div>
+          <div class="brigada-card-title">Presidente / Representante Legal</div>
+        </div>
+        <div class="brigada-fields-wrapper" id="bfw-presidente">
+        <div class="brigada-card-body">
+          <div class="brigada-subfield">
+            <label>Nombre completo</label>
+            <input class="field-input" id="in-brig-presidente-nombre" type="text" placeholder="Nombre" oninput="guardarBrigadaField('presidente_nombre',this)" style="margin:0">
+          </div>
+          <div class="brigada-subfield">
+            <label>Teléfono</label>
+            <input class="field-input" id="in-brig-presidente-tel" type="tel" inputmode="numeric" maxlength="10" placeholder="10 dígitos" oninput="guardarBrigadaField('presidente_tel',this)" style="margin:0">
+          </div>
+        </div>
+        </div>
+        <div class="brigada-privacy">
+          <span class="brigada-privacy-label">🔒 Privacidad</span>
+          <label class="privacy-toggle">
+            <input type="checkbox" onchange="togglePrivacidadBrigada('presidente',this)">
+            <span class="privacy-track"></span>
+            <span class="privacy-toggle-label">Prefiero no compartir</span>
+          </label>
+        </div>
       </div>
-      <div class="field-status-badge" id="badge-fg-responsable"></div>
-    </div>
-    <div class="field-group" id="fg-tel-emergencia">
-      <div class="field-label">Teléfonos de emergencia internos</div>
-      <textarea class="field-input" id="in-tel-emergencia" style="min-height:70px" placeholder="Responsable: 81-XXXX-XXXX, Gerente: 81-XXXX-XXXX" oninput="onCampoChange('fg-tel-emergencia',this,'seguridad','telefonos_emergencia')"></textarea>
-      <div class="status-opts">
-        <button class="status-btn" onclick="setStatus(this,'fg-tel-emergencia','pendiente','seguridad','telefonos_emergencia')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>Pendiente</button>
+
+      <!-- SECRETARIO -->
+      <div class="brigada-card">
+        <div class="brigada-card-header">
+          <div class="brigada-card-icon secretario">📋</div>
+          <div class="brigada-card-title">Secretario</div>
+        </div>
+        <div class="brigada-fields-wrapper" id="bfw-secretario">
+        <div class="brigada-card-body">
+          <div class="brigada-subfield">
+            <label>Nombre completo</label>
+            <input class="field-input" id="in-brig-secretario-nombre" type="text" placeholder="Nombre" oninput="guardarBrigadaField('secretario_nombre',this)" style="margin:0">
+          </div>
+          <div class="brigada-subfield">
+            <label>Teléfono</label>
+            <input class="field-input" id="in-brig-secretario-tel" type="tel" inputmode="numeric" maxlength="10" placeholder="10 dígitos" oninput="guardarBrigadaField('secretario_tel',this)" style="margin:0">
+          </div>
+        </div>
+        </div>
+        <div class="brigada-privacy">
+          <span class="brigada-privacy-label">🔒 Privacidad</span>
+          <label class="privacy-toggle">
+            <input type="checkbox" onchange="togglePrivacidadBrigada('secretario',this)">
+            <span class="privacy-track"></span>
+            <span class="privacy-toggle-label">Prefiero no compartir</span>
+          </label>
+        </div>
       </div>
-      <div class="field-status-badge" id="badge-fg-tel-emergencia"></div>
-    </div>
+
+      <!-- SUPLENTE -->
+      <div class="brigada-card">
+        <div class="brigada-card-header">
+          <div class="brigada-card-icon suplente">🔄</div>
+          <div class="brigada-card-title">Suplente</div>
+        </div>
+        <div class="brigada-fields-wrapper" id="bfw-suplente">
+        <div class="brigada-card-body">
+          <div class="brigada-subfield">
+            <label>Nombre completo</label>
+            <input class="field-input" id="in-brig-suplente-nombre" type="text" placeholder="Nombre" oninput="guardarBrigadaField('suplente_nombre',this)" style="margin:0">
+          </div>
+          <div class="brigada-subfield">
+            <label>Teléfono</label>
+            <input class="field-input" id="in-brig-suplente-tel" type="tel" inputmode="numeric" maxlength="10" placeholder="10 dígitos" oninput="guardarBrigadaField('suplente_tel',this)" style="margin:0">
+          </div>
+        </div>
+        </div>
+        <div class="brigada-privacy">
+          <span class="brigada-privacy-label">🔒 Privacidad</span>
+          <label class="privacy-toggle">
+            <input type="checkbox" onchange="togglePrivacidadBrigada('suplente',this)">
+            <span class="privacy-track"></span>
+            <span class="privacy-toggle-label">Prefiero no compartir</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- DIRECTOR -->
+      <div class="brigada-card">
+        <div class="brigada-card-header">
+          <div class="brigada-card-icon director">🎯</div>
+          <div class="brigada-card-title">Director</div>
+        </div>
+        <div class="brigada-fields-wrapper" id="bfw-director">
+        <div class="brigada-card-body">
+          <div class="brigada-subfield">
+            <label>Nombre completo</label>
+            <input class="field-input" id="in-brig-director-nombre" type="text" placeholder="Nombre" oninput="guardarBrigadaField('director_nombre',this)" style="margin:0">
+          </div>
+          <div class="brigada-subfield">
+            <label>Teléfono</label>
+            <input class="field-input" id="in-brig-director-tel" type="tel" inputmode="numeric" maxlength="10" placeholder="10 dígitos" oninput="guardarBrigadaField('director_tel',this)" style="margin:0">
+          </div>
+        </div>
+        </div>
+        <div class="brigada-privacy">
+          <span class="brigada-privacy-label">🔒 Privacidad</span>
+          <label class="privacy-toggle">
+            <input type="checkbox" onchange="togglePrivacidadBrigada('director',this)">
+            <span class="privacy-track"></span>
+            <span class="privacy-toggle-label">Prefiero no compartir</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- CONTRA INCENDIOS -->
+      <div class="brigada-card">
+        <div class="brigada-card-header">
+          <div class="brigada-card-icon incendios">🧯</div>
+          <div class="brigada-card-title">Brigadista contra incendios</div>
+        </div>
+        <div class="brigada-fields-wrapper" id="bfw-incendios">
+        <div class="brigada-card-body">
+          <div class="brigada-subfield">
+            <label>Nombre completo</label>
+            <input class="field-input" id="in-brig-incendios-nombre" type="text" placeholder="Nombre" oninput="guardarBrigadaField('incendios_nombre',this)" style="margin:0">
+          </div>
+          <div class="brigada-subfield">
+            <label>Teléfono</label>
+            <input class="field-input" id="in-brig-incendios-tel" type="tel" inputmode="numeric" maxlength="10" placeholder="10 dígitos" oninput="guardarBrigadaField('incendios_tel',this)" style="margin:0">
+          </div>
+        </div>
+        </div>
+        <div class="brigada-privacy">
+          <span class="brigada-privacy-label">🔒 Privacidad</span>
+          <label class="privacy-toggle">
+            <input type="checkbox" onchange="togglePrivacidadBrigada('incendios',this)">
+            <span class="privacy-track"></span>
+            <span class="privacy-toggle-label">Prefiero no compartir</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- EVACUACIÓN -->
+      <div class="brigada-card">
+        <div class="brigada-card-header">
+          <div class="brigada-card-icon evacuacion">🚪</div>
+          <div class="brigada-card-title">Brigadista de evacuación</div>
+        </div>
+        <div class="brigada-fields-wrapper" id="bfw-evacuacion">
+        <div class="brigada-card-body">
+          <div class="brigada-subfield">
+            <label>Nombre completo</label>
+            <input class="field-input" id="in-brig-evacuacion-nombre" type="text" placeholder="Nombre" oninput="guardarBrigadaField('evacuacion_nombre',this)" style="margin:0">
+          </div>
+          <div class="brigada-subfield">
+            <label>Teléfono</label>
+            <input class="field-input" id="in-brig-evacuacion-tel" type="tel" inputmode="numeric" maxlength="10" placeholder="10 dígitos" oninput="guardarBrigadaField('evacuacion_tel',this)" style="margin:0">
+          </div>
+        </div>
+        </div>
+        <div class="brigada-privacy">
+          <span class="brigada-privacy-label">🔒 Privacidad</span>
+          <label class="privacy-toggle">
+            <input type="checkbox" onchange="togglePrivacidadBrigada('evacuacion',this)">
+            <span class="privacy-track"></span>
+            <span class="privacy-toggle-label">Prefiero no compartir</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- PRIMEROS AUXILIOS -->
+      <div class="brigada-card">
+        <div class="brigada-card-header">
+          <div class="brigada-card-icon auxilios">🏥</div>
+          <div class="brigada-card-title">Brigadista de primeros auxilios</div>
+        </div>
+        <div class="brigada-fields-wrapper" id="bfw-auxilios">
+        <div class="brigada-card-body">
+          <div class="brigada-subfield">
+            <label>Nombre completo</label>
+            <input class="field-input" id="in-brig-auxilios-nombre" type="text" placeholder="Nombre" oninput="guardarBrigadaField('auxilios_nombre',this)" style="margin:0">
+          </div>
+          <div class="brigada-subfield">
+            <label>Teléfono</label>
+            <input class="field-input" id="in-brig-auxilios-tel" type="tel" inputmode="numeric" maxlength="10" placeholder="10 dígitos" oninput="guardarBrigadaField('auxilios_tel',this)" style="margin:0">
+          </div>
+        </div>
+        </div>
+        <div class="brigada-privacy">
+          <span class="brigada-privacy-label">🔒 Privacidad</span>
+          <label class="privacy-toggle">
+            <input type="checkbox" onchange="togglePrivacidadBrigada('auxilios',this)">
+            <span class="privacy-track"></span>
+            <span class="privacy-toggle-label">Prefiero no compartir</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- BÚSQUEDA Y RESCATE -->
+      <div class="brigada-card">
+        <div class="brigada-card-header">
+          <div class="brigada-card-icon rescate">🔍</div>
+          <div class="brigada-card-title">Brigadista de búsqueda y rescate</div>
+        </div>
+        <div class="brigada-fields-wrapper" id="bfw-rescate">
+        <div class="brigada-card-body">
+          <div class="brigada-subfield">
+            <label>Nombre completo</label>
+            <input class="field-input" id="in-brig-rescate-nombre" type="text" placeholder="Nombre" oninput="guardarBrigadaField('rescate_nombre',this)" style="margin:0">
+          </div>
+          <div class="brigada-subfield">
+            <label>Teléfono</label>
+            <input class="field-input" id="in-brig-rescate-tel" type="tel" inputmode="numeric" maxlength="10" placeholder="10 dígitos" oninput="guardarBrigadaField('rescate_tel',this)" style="margin:0">
+          </div>
+        </div>
+        </div>
+        <div class="brigada-privacy">
+          <span class="brigada-privacy-label">🔒 Privacidad</span>
+          <label class="privacy-toggle">
+            <input type="checkbox" onchange="togglePrivacidadBrigada('rescate',this)">
+            <span class="privacy-track"></span>
+            <span class="privacy-toggle-label">Prefiero no compartir</span>
+          </label>
+        </div>
+      </div>
+
+    </div><!-- /brigada-grid -->
+
     <div class="nav-buttons">
       <button class="btn btn-secondary" onclick="goToStep(2)">← Atrás</button>
-      <div class="save-indicator"><div class="save-dot"></div>Guardado</div>
-      <button class="btn btn-primary" onclick="avanzarSeccion(3,4,'seguridad')">
+      <div class="save-indicator"><div class="save-dot"></div><span id="save-label-3">Guardado</span></div>
+      <button class="btn btn-primary" onclick="avanzarSeccion(3,4,'brigadas')">
         Continuar <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
       </button>
     </div>
   </div>
 
-  <!-- STEP 4: FOTOGRAFÍAS -->
+  <!-- STEP 4: FOTOGRAFÍAS (igual que antes) -->
   <div class="section-card" id="step-4">
     <div class="section-header">
       <div class="section-tag">Sección D</div>
@@ -513,41 +800,78 @@
     </div>
   </div>
 
-  <!-- STEP 5: DOCUMENTOS -->
+  <!-- ═══════════════════════════════════════════════════════
+       STEP 5: DOCUMENTOS (AMPLIADO)
+       ═══════════════════════════════════════════════════════ -->
   <div class="section-card" id="step-5">
     <div class="section-header">
       <div class="section-tag">Sección E</div>
       <h2 class="section-title">Documentación</h2>
-      <p class="section-desc">Adjunta los documentos requeridos. PDF, JPG o PNG.</p>
+      <p class="section-desc">Adjunta los documentos de tu establecimiento. PDF, JPG o PNG. Los marcados con <span style="color:var(--rojo);font-weight:600">*</span> son indispensables; el resto son deseables.</p>
     </div>
-    <div class="field-group" id="fg-ine">
-      <div class="field-label">INE del representante legal <span class="req">*</span></div>
-      <div class="upload-zone" id="zone-ine">
-        <input type="file" accept=".pdf,.jpg,.jpeg,.png" onchange="subirDocumento(this,'ine','zone-ine')" multiple>
-        <div class="upload-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D72B2B" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-        <div class="upload-title">Subir INE</div>
-        <div class="upload-hint">Frente y reverso</div>
+
+    <!-- DOCUMENTOS REQUERIDOS -->
+    <div class="subsection-title">Documentos requeridos</div>
+    <div class="doc-grid">
+
+      <div class="doc-item" id="doc-ine">
+        <div class="doc-item-header">
+          <div class="doc-item-left">
+            <div class="doc-item-icon">🪪</div>
+            <div>
+              <div class="doc-item-label">INE del representante legal <span style="color:var(--rojo)">*</span></div>
+              <span class="doc-item-opt">Frente y reverso</span>
+            </div>
+          </div>
+          <div class="doc-item-actions">
+            <span class="doc-status-tag" id="ds-ine" style="display:none"></span>
+            <label class="doc-upload-btn">
+              <input type="file" accept=".pdf,.jpg,.jpeg,.png" multiple onchange="subirDocumento(this,'ine','doc-ine','ds-ine')">
+              📎 Subir
+            </label>
+          </div>
+        </div>
+        <div class="doc-item-status-opts">
+          <button class="status-btn" style="font-size:11px;padding:3px 9px" onclick="setDocStatus('doc-ine','ds-ine','no-tengo','documentos','ine')">No tengo</button>
+          <button class="status-btn" style="font-size:11px;padding:3px 9px" onclick="setDocStatus('doc-ine','ds-ine','pendiente','documentos','ine')">Pendiente</button>
+        </div>
       </div>
-      <div class="status-opts" style="margin-top:10px">
-        <button class="status-btn" onclick="setStatus(this,'fg-ine','no-tengo','documentos','ine')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>No tengo</button>
-        <button class="status-btn" onclick="setStatus(this,'fg-ine','pendiente','documentos','ine')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>Pendiente</button>
+
+      <div class="doc-item" id="doc-constancia">
+        <div class="doc-item-header">
+          <div class="doc-item-left">
+            <div class="doc-item-icon">📄</div>
+            <div>
+              <div class="doc-item-label">Constancia de situación fiscal (SAT) <span style="color:var(--rojo)">*</span></div>
+              <span class="doc-item-opt">O nombre y dirección del negocio</span>
+            </div>
+          </div>
+          <div class="doc-item-actions">
+            <span class="doc-status-tag" id="ds-constancia" style="display:none"></span>
+            <label class="doc-upload-btn">
+              <input type="file" accept=".pdf,.jpg,.jpeg,.png" onchange="subirDocumento(this,'constancia_fiscal','doc-constancia','ds-constancia')">
+              📎 Subir
+            </label>
+          </div>
+        </div>
+        <div class="doc-item-status-opts">
+          <button class="status-btn" style="font-size:11px;padding:3px 9px" onclick="setDocStatus('doc-constancia','ds-constancia','no-tengo','documentos','constancia_fiscal')">No tengo</button>
+          <button class="status-btn" style="font-size:11px;padding:3px 9px" onclick="setDocStatus('doc-constancia','ds-constancia','pendiente','documentos','constancia_fiscal')">Pendiente</button>
+        </div>
       </div>
-      <div class="field-status-badge" id="badge-fg-ine"></div>
+
     </div>
-    <div class="field-group" id="fg-constancia">
-      <div class="field-label">Constancia de situación fiscal (SAT)</div>
-      <div class="upload-zone" id="zone-constancia">
-        <input type="file" accept=".pdf,.jpg,.jpeg,.png" onchange="subirDocumento(this,'constancia_fiscal','zone-constancia')">
-        <div class="upload-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D72B2B" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-        <div class="upload-title">Subir constancia fiscal</div>
-        <div class="upload-hint">PDF o imagen</div>
-      </div>
-      <div class="status-opts" style="margin-top:10px">
-        <button class="status-btn" onclick="setStatus(this,'fg-constancia','no-tengo','documentos','constancia_fiscal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>No tengo</button>
-        <button class="status-btn" onclick="setStatus(this,'fg-constancia','pendiente','documentos','constancia_fiscal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>Pendiente</button>
-      </div>
-      <div class="field-status-badge" id="badge-fg-constancia"></div>
+
+    <div class="divider"></div>
+
+    <!-- DOCUMENTOS ANEXOS DESEABLES -->
+    <div class="subsection-title">Documentos anexos <span style="font-weight:400;font-size:12px;color:#aaa">(deseables)</span></div>
+    <div class="info-banner" style="margin-bottom:16px">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <div>Estos documentos enriquecen tu Plan de Contingencia pero no son obligatorios. Sube los que tengas disponibles.</div>
     </div>
+    <div class="doc-grid" id="doc-grid-anexos"></div>
+
     <div class="nav-buttons">
       <button class="btn btn-secondary" onclick="goToStep(4)">← Atrás</button>
       <div class="save-indicator"><div class="save-dot"></div>Guardado</div>
@@ -572,7 +896,7 @@
         <div class="success-detail-row"><span class="key">Estado</span><span class="val" style="color:var(--amarillo)">En revisión</span></div>
         <div class="success-detail-row"><span class="key">Siguiente paso</span><span class="val">Te contactaremos por WhatsApp</span></div>
       </div>
-      <p style="font-size:13px;color:#aaa;margin-top:24px">¿Tienes dudas? Escríbenos al <strong style="color:var(--negro)">WhatsApp de Industria Segura MM</strong></p>
+      <p style="font-size:13px;color:#aaa;margin-top:24px">¿Tienes dudas? Llámanos al <strong style="color:var(--negro)">818-077-0841</strong></p>
     </div>
   </div>
 
@@ -583,15 +907,14 @@
 //  ESTADO GLOBAL
 // ══════════════════════════════════════════════════════════════
 const state = {
-  token:          null,   // Token de la URL
-  expedienteId:   null,   // ID del expediente en la BD
-  folio:          null,   // Folio visible
+  token:          null,
+  expedienteId:   null,
+  folio:          null,
   currentStep:    0,
   progreso:       0,
-  fields:         {},     // Estado local de cada campo
-  counters:       {},
+  fields:         {},
   guardandoTimer: null,
-  modoOffline:    false   // Si el backend no responde, modo local
+  modoOffline:    false
 };
 
 const PHOTO_CATS = [
@@ -607,54 +930,59 @@ const PHOTO_CATS = [
   {id:'croquis',      label:'Croquis o plano',          icon:'📋'},
 ];
 
-const STEPS = ['Bienvenida','Datos generales','Operación','Seguridad','Fotografías','Documentos','Listo'];
+const DOC_ANEXOS = [
+  {id:'permiso_uso_suelo',       label:'Permiso de uso de suelo',          icon:'🏛️'},
+  {id:'planos',                  label:'Planos del establecimiento',        icon:'📐'},
+  {id:'bitacora_mantenimiento',  label:'Bitácora de mantenimiento',         icon:'🔧'},
+  {id:'comprobante_domicilio',   label:'Comprobante de domicilio',          icon:'📬'},
+  {id:'seguro_rc',               label:'Seguro de Responsabilidad Civil',   icon:'🛡️'},
+  {id:'bitacora_fumigacion',     label:'Bitácora de fumigación',            icon:'🪲'},
+  {id:'factura_extintores',      label:'Factura de recarga de extintores',  icon:'🧯'},
+  {id:'dictamen_estructural',    label:'Dictamen estructural',              icon:'🏗️'},
+  {id:'dictamen_gas',            label:'Dictamen de gas LP',                icon:'⛽'},
+  {id:'prueba_hermeticidad',     label:'Prueba de hermeticidad (Gas natural)', icon:'🔩'},
+];
+
+const STEPS = ['Bienvenida','Datos generales','Operación','Brigadas','Fotografías','Documentos','Listo'];
 
 // ══════════════════════════════════════════════════════════════
-//  INICIALIZACIÓN — Se ejecuta al cargar la página
+//  INICIALIZACIÓN
 // ══════════════════════════════════════════════════════════════
 async function init() {
   buildPhotoGrid();
+  buildDocAnexos();
 
-  // Obtener token de la URL: /portal/ABC123
-const partes = window.location.pathname.split('/');
-const token = partes[partes.length - 1];
+  const partes = window.location.pathname.split('/');
+  const token  = partes[partes.length - 1];
 
-  // Si no hay token en la URL, intentar modo demo
- if (!token || token === '' || token === 'portal') {
-  console.warn('Modo demo sin token');
-} else {
-  state.modoOffline = false;
+  if (!token || token === '' || token === 'portal') {
+    console.warn('Modo demo sin token');
+    state.modoOffline = true;
+    state.folio = 'PC-DEMO';
+    document.getElementById('folioNum').textContent = 'Demo';
+    actualizarProgreso(0);
+    mostrarStep('step-loading', 'step-0');
+    return;
+  }
+
   state.token = token;
-}
 
-  state.token = token;
-
-  // Cargar expediente desde el backend
   try {
     const resp = await fetch(`${API_URL}/api/portal/${token}`);
-
-    if (!resp.ok) {
-      mostrarStep('step-loading', 'step-error');
-      return;
-    }
+    if (!resp.ok) { mostrarStep('step-loading', 'step-error'); return; }
 
     const expediente = await resp.json();
     state.expedienteId = expediente.id;
     state.folio        = expediente.folio;
     state.progreso     = expediente.progreso || 0;
 
-    // Actualizar UI con datos del servidor
     document.getElementById('folioNum').textContent = expediente.folio;
     actualizarProgreso(state.progreso);
-
-    // Rellenar formulario con datos ya guardados
     rellenarFormularioDesdeBD(expediente.datos_json || {});
-
     mostrarStep('step-loading', 'step-0');
 
   } catch (err) {
     console.error('Error de conexión:', err);
-    // Modo offline: usar localStorage como respaldo
     state.modoOffline = true;
     state.folio = 'PC-2025-LOCAL';
     document.getElementById('folioNum').textContent = 'Modo offline';
@@ -688,72 +1016,72 @@ function mostrarStep(ocultar, mostrar) {
 function updateStepPills() {
   document.querySelectorAll('.step-pill').forEach((p, i) => {
     p.classList.remove('active','done','pending');
-    if (i < state.currentStep)     p.classList.add('done');
-    else if (i === state.currentStep) p.classList.add('active');
-    else                            p.classList.add('pending');
+    if (i < state.currentStep) {
+      p.classList.add('done');
+      p.onclick = () => goToStep(i);
+      p.title = 'Clic para regresar a esta sección';
+    } else if (i === state.currentStep) {
+      p.classList.add('active');
+      p.onclick = null;
+      p.title = '';
+    } else {
+      p.classList.add('pending');
+      p.onclick = null;
+      p.title = 'Completa las secciones anteriores primero';
+    }
   });
 }
 
 // ══════════════════════════════════════════════════════════════
-//  AVANZAR SECCIÓN — Guarda antes de pasar al siguiente paso
+//  AVANZAR SECCIÓN
 // ══════════════════════════════════════════════════════════════
 async function avanzarSeccion(stepActual, stepSiguiente, seccion) {
   const btn = document.querySelector(`#step-${stepActual} .btn-primary`);
   if (btn) { btn.disabled = true; btn.textContent = 'Guardando...'; }
 
   const campos = recopilarSeccion(seccion);
-  const ok     = await guardarEnBackend(seccion, campos);
+  await guardarEnBackend(seccion, campos);
 
-  if (btn) { btn.disabled = false; btn.innerHTML = `Continuar <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>`; }
-
+  if (btn) {
+    btn.disabled = false;
+    btn.innerHTML = `Continuar <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>`;
+  }
   goToStep(stepSiguiente);
 }
 
 // ══════════════════════════════════════════════════════════════
-//  GUARDAR EN EL BACKEND
+//  GUARDAR EN BACKEND
 // ══════════════════════════════════════════════════════════════
 async function guardarEnBackend(seccion, campos) {
   if (state.modoOffline) {
-    // Guardar en localStorage como respaldo
-    const clave = `IS_${state.token || 'demo'}_${seccion}`;
-    localStorage.setItem(clave, JSON.stringify(campos));
+    localStorage.setItem(`IS_${state.token || 'demo'}_${seccion}`, JSON.stringify(campos));
     return true;
   }
-
   try {
     const resp = await fetch(`${API_URL}/api/portal/${state.token}/datos`, {
       method:  'PUT',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ seccion, campos })
     });
-
-    if (!resp.ok) throw new Error('Error del servidor');
-
+    if (!resp.ok) throw new Error('Error servidor');
     const data = await resp.json();
     state.progreso = data.progreso;
     actualizarProgreso(data.progreso);
     return true;
-
   } catch (err) {
-    console.error('Error guardando, usando localStorage:', err);
-    // Fallback a localStorage si hay error de red
-    const clave = `IS_${state.token}_${seccion}`;
-    localStorage.setItem(clave, JSON.stringify(campos));
+    console.error('Error guardando:', err);
+    localStorage.setItem(`IS_${state.token}_${seccion}`, JSON.stringify(campos));
     return false;
   }
 }
 
 // ══════════════════════════════════════════════════════════════
-//  CAMPO CHANGE — Autoguardado con debounce
+//  CAMPO CHANGE — AUTOGUARDADO
 // ══════════════════════════════════════════════════════════════
 function onCampoChange(grupoId, input, seccion, campo) {
-  // Guardar en estado local
   state.fields[`${seccion}.${campo}`] = { valor: input.value, estatus: 'answered' };
-
-  // Limpiar estado especial si el usuario empieza a escribir
   clearStatus(grupoId);
 
-  // Autoguardado con debounce (1.5 segundos de inactividad)
   clearTimeout(state.guardandoTimer);
   const saveLabel = document.getElementById(`save-label-${state.currentStep}`);
   if (saveLabel) saveLabel.textContent = 'Guardando...';
@@ -766,10 +1094,28 @@ function onCampoChange(grupoId, input, seccion, campo) {
 }
 
 // ══════════════════════════════════════════════════════════════
-//  STATUS BUTTONS (No tengo / No aplica / Pendiente)
+//  GUARDAR CAMPO DE BRIGADA CON DEBOUNCE
+// ══════════════════════════════════════════════════════════════
+function guardarBrigadaField(campo, input) {
+  state.fields[`brigadas.${campo}`] = { valor: input.value, estatus: 'answered' };
+
+  clearTimeout(state.guardandoTimer);
+  const saveLabel = document.getElementById('save-label-3');
+  if (saveLabel) saveLabel.textContent = 'Guardando...';
+
+  state.guardandoTimer = setTimeout(async () => {
+    const campos = recopilarSeccion('brigadas');
+    await guardarEnBackend('brigadas', campos);
+    if (saveLabel) saveLabel.textContent = 'Guardado automáticamente';
+  }, 1500);
+}
+
+// ══════════════════════════════════════════════════════════════
+//  STATUS BUTTONS
 // ══════════════════════════════════════════════════════════════
 function setStatus(btn, grupoId, statusType, seccion, campo) {
   const fg      = document.getElementById(grupoId);
+  if (!fg) return;
   const allBtns = fg.querySelectorAll('.status-btn');
   const isActive = btn.classList.contains('active-' + statusType);
 
@@ -779,27 +1125,19 @@ function setStatus(btn, grupoId, statusType, seccion, campo) {
   const input = fg.querySelector('input,select,textarea');
 
   if (isActive) {
-    // Toggle off
     delete state.fields[`${seccion}.${campo}`];
-    badge.classList.remove('show','no-tengo','no-aplica','pendiente');
-    badge.textContent = '';
+    if (badge) { badge.classList.remove('show','no-tengo','no-aplica','pendiente'); badge.textContent = ''; }
     if (input) { input.disabled = false; input.style.opacity = '1'; }
   } else {
     btn.classList.add('active-' + statusType);
     state.fields[`${seccion}.${campo}`] = { valor: null, estatus: statusType };
-
     const labels = { 'no-tengo':'✗ No tengo', 'no-aplica':'— No aplica', 'pendiente':'⏱ Pendiente por enviar' };
-    badge.textContent = labels[statusType] || '';
-    badge.className = `field-status-badge show ${statusType}`;
-
+    if (badge) { badge.textContent = labels[statusType] || ''; badge.className = `field-status-badge show ${statusType}`; }
     if (input && (statusType === 'no-tengo' || statusType === 'no-aplica')) {
       input.disabled = true; input.style.opacity = '0.4';
     }
-
-    // Guardar estado especial en backend
-    const campos = {};
-    campos[campo] = { valor: null, estatus: statusType };
-    guardarEnBackend(seccion, campos);
+    const c = {}; c[campo] = { valor: null, estatus: statusType };
+    guardarEnBackend(seccion, c);
   }
 }
 
@@ -815,61 +1153,118 @@ function clearStatus(grupoId) {
 }
 
 // ══════════════════════════════════════════════════════════════
-//  RECOPILAR SECCIÓN DEL FORMULARIO
+//  STATUS DE DOCUMENTOS (nuevo diseño)
+// ══════════════════════════════════════════════════════════════
+function setDocStatus(docId, tagId, statusType, seccion, campo) {
+  const tag = document.getElementById(tagId);
+  if (!tag) return;
+
+  const labels = { 'no-tengo':'✗ No tengo', 'pendiente':'⏱ Pendiente', 'no-aplica':'— No aplica' };
+  const isActive = tag.dataset.status === statusType;
+
+  if (isActive) {
+    tag.style.display = 'none';
+    tag.dataset.status = '';
+    delete state.fields[`${seccion}.${campo}`];
+  } else {
+    tag.textContent = labels[statusType];
+    tag.className = `doc-status-tag ${statusType}`;
+    tag.style.display = 'inline-block';
+    tag.dataset.status = statusType;
+    state.fields[`${seccion}.${campo}`] = { valor: null, estatus: statusType };
+    const c = {}; c[campo] = { valor: null, estatus: statusType };
+    guardarEnBackend(seccion, c);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  RECOPILAR SECCIÓN
 // ══════════════════════════════════════════════════════════════
 function recopilarSeccion(seccion) {
   const campos = {};
-  const fieldState = state.fields;
 
-  Object.entries(fieldState).forEach(([clave, valor]) => {
+  Object.entries(state.fields).forEach(([clave, valor]) => {
     if (clave.startsWith(seccion + '.')) {
-      const campo = clave.replace(seccion + '.', '');
-      campos[campo] = valor;
+      campos[clave.replace(seccion + '.', '')] = valor;
     }
   });
 
-  // También leer inputs directamente (por si no están en state.fields)
   const inputMap = {
     generales: {
       nombre_comercial:'in-nombre', razon_social:'in-razon', rfc:'in-rfc',
       representante_legal:'in-rep', domicilio:'in-domicilio', municipio:'in-municipio',
       codigo_postal:'in-cp', telefono:'in-tel', email:'in-email', giro:'in-giro',
-      superficie:'in-superficie', aforo:'in-aforo', trabajadores:'in-trabajadores', horario:'in-horario'
+      m2_terreno:'in-m2-terreno', m2_construccion:'in-m2-construccion',
+      aforo:'in-aforo', trabajadores:'in-trabajadores', horario:'in-horario',
+      servicios:'in-servicios'
     },
     operativa: {
       actividades:'in-actividades', areas:'in-areas',
       quimicos:'in-quimicos', instalacion_electrica:'in-electrico'
     },
-    seguridad: {
-      responsable_seguridad:'in-responsable', telefonos_emergencia:'in-tel-emergencia'
+    brigadas: {
+      presidente_nombre:'in-brig-presidente-nombre', presidente_tel:'in-brig-presidente-tel',
+      secretario_nombre:'in-brig-secretario-nombre',  secretario_tel:'in-brig-secretario-tel',
+      suplente_nombre:'in-brig-suplente-nombre',       suplente_tel:'in-brig-suplente-tel',
+      director_nombre:'in-brig-director-nombre',       director_tel:'in-brig-director-tel',
+      incendios_nombre:'in-brig-incendios-nombre',     incendios_tel:'in-brig-incendios-tel',
+      evacuacion_nombre:'in-brig-evacuacion-nombre',   evacuacion_tel:'in-brig-evacuacion-tel',
+      auxilios_nombre:'in-brig-auxilios-nombre',       auxilios_tel:'in-brig-auxilios-tel',
+      rescate_nombre:'in-brig-rescate-nombre',         rescate_tel:'in-brig-rescate-tel'
     }
   };
 
   const mapa = inputMap[seccion] || {};
   Object.entries(mapa).forEach(([clave, inputId]) => {
-    if (campos[clave]) return; // Ya tiene valor del state
+    if (campos[clave]) return;
     const el = document.getElementById(inputId);
-    if (el && el.value.trim()) {
-      campos[clave] = { valor: el.value.trim(), estatus: 'answered' };
-    }
+    if (el && el.value.trim()) campos[clave] = { valor: el.value.trim(), estatus: 'answered' };
   });
 
   return campos;
 }
 
 // ══════════════════════════════════════════════════════════════
-//  SUBIR FOTOGRAFÍAS
+//  LOGOTIPO
+// ══════════════════════════════════════════════════════════════
+async function handleLogoUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = document.getElementById('logo-preview-img');
+    const placeholder = document.querySelector('.logo-preview-placeholder');
+    img.src = e.target.result;
+    img.style.display = 'block';
+    if (placeholder) placeholder.style.display = 'none';
+    document.getElementById('logo-upload-zone').style.borderColor = 'var(--verde)';
+  };
+  reader.readAsDataURL(file);
+
+  if (!state.modoOffline && state.token) {
+    const formData = new FormData();
+    formData.append('archivo', file);
+    formData.append('categoria', 'logotipo');
+    formData.append('estatusCampo', 'subido');
+    try {
+      await fetch(`${API_URL}/api/portal/${state.token}/archivo`, { method:'POST', body:formData });
+    } catch (err) { console.error('Error subiendo logotipo:', err); }
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  FOTOS
 // ══════════════════════════════════════════════════════════════
 async function handlePhotoUpload(input, catId) {
   const file = input.files[0];
   if (!file) return;
 
-  const prev      = document.getElementById(`photo-prev-${catId}`);
-  const thumb     = document.getElementById(`photo-thumb-${catId}`);
-  const nameEl    = document.getElementById(`photo-name-${catId}`);
+  const prev       = document.getElementById(`photo-prev-${catId}`);
+  const thumb      = document.getElementById(`photo-thumb-${catId}`);
+  const nameEl     = document.getElementById(`photo-name-${catId}`);
   const uploadZone = document.getElementById(`photo-upload-${catId}`);
 
-  // Vista previa inmediata (UX rápida)
   const reader = new FileReader();
   reader.onload = e => {
     thumb.src = e.target.result;
@@ -880,53 +1275,44 @@ async function handlePhotoUpload(input, catId) {
   };
   reader.readAsDataURL(file);
 
-  // Subir al backend en segundo plano
   if (!state.modoOffline && state.token) {
     const formData = new FormData();
     formData.append('archivo', file);
     formData.append('categoria', catId);
     formData.append('estatusCampo', 'subido');
-
     try {
-      await fetch(`${API_URL}/api/portal/${state.token}/archivo`, {
-        method: 'POST',
-        body:   formData
-      });
-    } catch (err) {
-      console.error('Error subiendo foto:', err);
-      // La vista previa ya se mostró, el usuario no nota el error
-    }
+      await fetch(`${API_URL}/api/portal/${state.token}/archivo`, { method:'POST', body:formData });
+    } catch (err) { console.error('Error subiendo foto:', err); }
   }
 }
 
 // ══════════════════════════════════════════════════════════════
-//  SUBIR DOCUMENTOS
+//  DOCUMENTOS
 // ══════════════════════════════════════════════════════════════
-async function subirDocumento(input, categoria, zoneId) {
+async function subirDocumento(input, categoria, docId, tagId) {
   const files = Array.from(input.files);
   if (!files.length) return;
 
-  const zone = document.getElementById(zoneId);
-  zone.style.borderColor  = 'var(--verde)';
-  zone.style.background   = 'var(--verde-light)';
-  zone.querySelector('.upload-title').textContent = `${files.length} archivo(s) listo(s)`;
-  zone.querySelector('.upload-hint').textContent  = files.map(f=>f.name).join(', ');
+  const item = document.getElementById(docId);
+  if (item) item.classList.add('uploaded');
 
-  // Subir cada archivo al backend
+  const tag = document.getElementById(tagId);
+  if (tag) {
+    tag.textContent = `✓ ${files.length} archivo(s)`;
+    tag.className   = 'doc-status-tag subido';
+    tag.style.display = 'inline-block';
+    tag.dataset.status = 'subido';
+  }
+
   for (const file of files) {
     if (!state.modoOffline && state.token) {
       const formData = new FormData();
       formData.append('archivo', file);
       formData.append('categoria', categoria);
       formData.append('estatusCampo', 'subido');
-
       try {
-        await fetch(`${API_URL}/api/portal/${state.token}/archivo`, {
-          method: 'POST', body: formData
-        });
-      } catch (err) {
-        console.error('Error subiendo documento:', err);
-      }
+        await fetch(`${API_URL}/api/portal/${state.token}/archivo`, { method:'POST', body:formData });
+      } catch (err) { console.error('Error subiendo doc:', err); }
     }
   }
 
@@ -934,21 +1320,17 @@ async function subirDocumento(input, categoria, zoneId) {
 }
 
 // ══════════════════════════════════════════════════════════════
-//  FINALIZAR ENVÍO
+//  FINALIZAR
 // ══════════════════════════════════════════════════════════════
 async function finalizarEnvio() {
-  // Cambiar estatus del expediente a "listo_para_revision"
   if (!state.modoOffline && state.token) {
-    try {
-      // Guardar última sección antes de finalizar
-      await guardarEnBackend('documentos', recopilarSeccion('documentos'));
-    } catch (e) {}
+    try { await guardarEnBackend('documentos', recopilarSeccion('documentos')); } catch(e){}
   }
   goToStep(6);
 }
 
 // ══════════════════════════════════════════════════════════════
-//  RELLENAR FORMULARIO DESDE BD
+//  RELLENAR DESDE BD
 // ══════════════════════════════════════════════════════════════
 function rellenarFormularioDesdeBD(datosJson) {
   if (!datosJson) return;
@@ -958,14 +1340,23 @@ function rellenarFormularioDesdeBD(datosJson) {
       nombre_comercial:'in-nombre', razon_social:'in-razon', rfc:'in-rfc',
       representante_legal:'in-rep', domicilio:'in-domicilio', municipio:'in-municipio',
       codigo_postal:'in-cp', telefono:'in-tel', email:'in-email', giro:'in-giro',
-      superficie:'in-superficie', aforo:'in-aforo', trabajadores:'in-trabajadores', horario:'in-horario'
+      m2_terreno:'in-m2-terreno', m2_construccion:'in-m2-construccion',
+      aforo:'in-aforo', trabajadores:'in-trabajadores', horario:'in-horario',
+      servicios:'in-servicios'
     },
     operativa: {
       actividades:'in-actividades', areas:'in-areas',
       quimicos:'in-quimicos', instalacion_electrica:'in-electrico'
     },
-    seguridad: {
-      responsable_seguridad:'in-responsable', telefonos_emergencia:'in-tel-emergencia'
+    brigadas: {
+      presidente_nombre:'in-brig-presidente-nombre', presidente_tel:'in-brig-presidente-tel',
+      secretario_nombre:'in-brig-secretario-nombre',  secretario_tel:'in-brig-secretario-tel',
+      suplente_nombre:'in-brig-suplente-nombre',       suplente_tel:'in-brig-suplente-tel',
+      director_nombre:'in-brig-director-nombre',       director_tel:'in-brig-director-tel',
+      incendios_nombre:'in-brig-incendios-nombre',     incendios_tel:'in-brig-incendios-tel',
+      evacuacion_nombre:'in-brig-evacuacion-nombre',   evacuacion_tel:'in-brig-evacuacion-tel',
+      auxilios_nombre:'in-brig-auxilios-nombre',       auxilios_tel:'in-brig-auxilios-tel',
+      rescate_nombre:'in-brig-rescate-nombre',         rescate_tel:'in-brig-rescate-tel'
     }
   };
 
@@ -980,16 +1371,6 @@ function rellenarFormularioDesdeBD(datosJson) {
       if (dato.estatus === 'answered' && dato.valor) {
         el.value = dato.valor;
         state.fields[`${seccion}.${campo}`] = dato;
-      } else if (['no-tengo','no-aplica','pendiente'].includes(dato.estatus)) {
-        // Restaurar badge de estado especial
-        const grupoId = inputId.replace('in-','fg-').replace('-','fg-');
-        const badge = document.getElementById(`badge-fg-${campo.replace(/_/g,'-')}`);
-        if (badge) {
-          const labels = { 'no-tengo':'✗ No tengo', 'no-aplica':'— No aplica', 'pendiente':'⏱ Pendiente' };
-          badge.textContent = labels[dato.estatus] || '';
-          badge.className = `field-status-badge show ${dato.estatus}`;
-          if (el && (dato.estatus==='no-tengo'||dato.estatus==='no-aplica')) { el.disabled=true; el.style.opacity='0.4'; }
-        }
       }
     });
   });
@@ -1033,6 +1414,69 @@ function buildPhotoGrid() {
       </div>
     </div>
   `).join('');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  DOC ANEXOS GRID
+// ══════════════════════════════════════════════════════════════
+function buildDocAnexos() {
+  const grid = document.getElementById('doc-grid-anexos');
+  grid.innerHTML = DOC_ANEXOS.map(doc => `
+    <div class="doc-item" id="doc-${doc.id}">
+      <div class="doc-item-header">
+        <div class="doc-item-left">
+          <div class="doc-item-icon">${doc.icon}</div>
+          <div>
+            <div class="doc-item-label">${doc.label}</div>
+            <span class="doc-item-opt">Deseable</span>
+          </div>
+        </div>
+        <div class="doc-item-actions">
+          <span class="doc-status-tag" id="ds-${doc.id}" style="display:none"></span>
+          <label class="doc-upload-btn">
+            <input type="file" accept=".pdf,.jpg,.jpeg,.png" onchange="subirDocumento(this,'${doc.id}','doc-${doc.id}','ds-${doc.id}')">
+            📎 Subir
+          </label>
+        </div>
+      </div>
+      <div class="doc-item-status-opts">
+        <button class="status-btn" style="font-size:11px;padding:3px 9px" onclick="setDocStatus('doc-${doc.id}','ds-${doc.id}','no-aplica','documentos','${doc.id}')">No aplica</button>
+        <button class="status-btn" style="font-size:11px;padding:3px 9px" onclick="setDocStatus('doc-${doc.id}','ds-${doc.id}','pendiente','documentos','${doc.id}')">Pendiente</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  TOGGLE PRIVACIDAD BRIGADA
+// ══════════════════════════════════════════════════════════════
+function togglePrivacidadBrigada(rol, checkbox) {
+  const wrapper = document.getElementById(`bfw-${rol}`);
+  const campoNombre = `${rol}_nombre`;
+  const campoTel    = `${rol}_tel`;
+
+  if (checkbox.checked) {
+    // Ocultar campos y registrar "prefiero no compartir"
+    wrapper.classList.add('hidden');
+    state.fields[`brigadas.${campoNombre}`] = { valor: null, estatus: 'no-compartir' };
+    state.fields[`brigadas.${campoTel}`]    = { valor: null, estatus: 'no-compartir' };
+    // Limpiar valores de inputs
+    const inpNombre = document.getElementById(`in-brig-${rol}-nombre`);
+    const inpTel    = document.getElementById(`in-brig-${rol}-tel`);
+    if (inpNombre) inpNombre.value = '';
+    if (inpTel)    inpTel.value    = '';
+  } else {
+    // Mostrar campos de nuevo
+    wrapper.classList.remove('hidden');
+    delete state.fields[`brigadas.${campoNombre}`];
+    delete state.fields[`brigadas.${campoTel}`];
+  }
+
+  // Autoguardar con debounce corto
+  clearTimeout(state.guardandoTimer);
+  state.guardandoTimer = setTimeout(() => {
+    guardarEnBackend('brigadas', recopilarSeccion('brigadas'));
+  }, 800);
 }
 
 // ══════════════════════════════════════════════════════════════
