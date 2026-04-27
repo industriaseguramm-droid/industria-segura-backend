@@ -196,9 +196,11 @@ footer{background:#111;color:#fff;padding:56px 40px 28px;}
 <body>
 <script>
 (function(){
+  var CFG = {};
   fetch('https://industria-segura-backend-production.up.railway.app/api/configuracion')
     .then(function(r){ return r.json(); })
     .then(function(c){
+      CFG = c;
       var s = function(id, val){ var e = document.getElementById(id); if(e && val) e.textContent = val; };
       s('cfg-hero-badge', c.hero_badge);
       s('cfg-hero-titulo', c.hero_titulo);
@@ -207,12 +209,6 @@ footer{background:#111;color:#fff;padding:56px 40px 28px;}
       s('cfg-stat-clientes', c.stat_clientes);
       s('cfg-stat-cursos', c.stat_cursos);
       s('cfg-stat-cob', c.stat_cobertura);
-      s('cfg-telefono-1', c.contacto_telefono);
-      s('cfg-telefono-2', c.contacto_telefono);
-      s('cfg-email', c.contacto_email);
-      s('cfg-municipio', c.contacto_municipio);
-      s('cfg-registro', c.registro);
-      s('cfg-footer-desc', c.footer_descripcion);
       if(c.whatsapp_numero){
         document.querySelectorAll('a[href*="wa.me"]').forEach(function(a){
           var txt = a.href.split('?text=')[1] || '';
@@ -224,6 +220,46 @@ footer{background:#111;color:#fff;padding:56px 40px 28px;}
           a.href = c.instagram_url;
         });
       }
+      var pMun = document.getElementById('p-mun');
+      if(pMun && c.precio_plan_municipio_medio){
+        pMun.options[2].value = c.precio_plan_municipio_medio;
+        pMun.options[3].value = c.precio_plan_municipio_medio;
+        pMun.options[4].value = c.precio_plan_municipio_medio;
+        pMun.options[5].value = c.precio_plan_municipio_medio;
+        pMun.options[6].value = c.precio_plan_municipio_alto;
+        pMun.options[7].value = c.precio_plan_municipio_alto;
+        pMun.options[8].value = c.precio_plan_municipio_otro;
+      }
+      var pGiro = document.getElementById('p-giro');
+      if(pGiro && c.precio_plan_base){
+        var base = parseInt(c.precio_plan_base);
+        pGiro.options[0].value = base;
+        pGiro.options[1].value = base + 1000;
+        pGiro.options[2].value = base + 2000;
+        pGiro.options[3].value = base + 3000;
+        pGiro.options[4].value = base + 4500;
+        pGiro.options[5].value = base + 6500;
+      }
+      var cTema = document.getElementById('c-tema');
+      if(cTema){
+        var pc = {
+          0: parseInt(c.precio_curso_incendios || 3500),
+          1: parseInt(c.precio_curso_primeros_auxilios || 3500),
+          2: parseInt(c.precio_curso_evacuacion || 3500),
+          3: parseInt(c.precio_curso_confinados || 4000),
+          4: parseInt(c.precio_curso_alturas || 4000),
+          5: parseInt(c.precio_curso_montacargas || 4500),
+          6: parseInt(c.precio_curso_alturas || 4000),
+          7: parseInt(c.precio_curso_incendios || 3500),
+          8: parseInt(c.precio_curso_incendios || 3500),
+          9: parseInt(c.precio_curso_montacargas || 4500)
+        };
+        for(var i=0; i<cTema.options.length; i++){
+          if(pc[i]) cTema.options[i].value = pc[i];
+        }
+      }
+      calcPlan();
+      calcCurso();
     })
     .catch(function(){});
 })();
