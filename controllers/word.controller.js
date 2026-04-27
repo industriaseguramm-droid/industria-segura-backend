@@ -153,8 +153,8 @@ async function generarResumenWord(req, res) {
     var tiposDocumento = ['ine', 'constancia_fiscal', 'permiso_uso_suelo',
       'comprobante_domicilio', 'planos', 'bitacora', 'seguro', 'factura'];
 
-    var fotos = todosArchivos.filter(function(a) { return !tiposDocumento.includes(a.tipo); });
-    var docs  = todosArchivos.filter(function(a) { return  tiposDocumento.includes(a.tipo); });
+    var fotos = todosArchivos.filter(function(a) { return !a.es_documento_plan; });
+    var docs  = todosArchivos.filter(function(a) { return  a.es_documento_plan; });
 
     var etiquetaFoto = {
       fachada:           'Fachada del establecimiento',
@@ -172,14 +172,15 @@ async function generarResumenWord(req, res) {
     var imagenesDescargadas = [];
     for (var i = 0; i < fotos.length; i++) {
       var foto = fotos[i];
-      if (!foto.url) continue;
+     var urlFoto = foto.url_publica || foto.url;
+      if (!urlFoto) continue;
       var partes = (foto.nombre_archivo || 'foto.jpg').split('.');
       var ext = partes[partes.length - 1];
-      var buffer = await fetchImageBuffer(foto.url);
+      var buffer = await fetchImageBuffer(urlFoto);
       if (buffer) {
         imagenesDescargadas.push({
           buffer: buffer,
-          caption: etiquetaFoto[foto.tipo] || foto.nombre_archivo || 'Fotografia',
+          caption: etiquetaFoto[foto.categoria] || foto.categoria || foto.nombre_original || 'Fotografia',
           extension: ext,
         });
       }
