@@ -519,6 +519,19 @@ body{font-family:'DM Sans',sans-serif;background:var(--panel);color:var(--texto)
       </div>
 
       <div class="det-box">
+        <div class="det-box">
+        <div class="box-title"><div class="box-dot"></div>Generar documento</div>
+        <p style="font-size:12px;color:var(--texto-muted);margin-bottom:10px;line-height:1.5">
+          Descarga un resumen Word con todos los datos del expediente, fotografías y brigadistas.
+        </p>
+        <button
+          id="btn-word"
+          onclick="descargarWord()"
+          style="display:flex;align-items:center;gap:7px;padding:9px 18px;background:#1A4F8A;color:#fff;border:none;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer;transition:all .2s">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Descargar Resumen Word
+        </button>
+      </div>
         <div class="box-title"><div class="box-dot"></div>Enviar observación</div>
         <textarea class="obs-ta" id="obs-in" placeholder="Escribe lo que le falta al cliente o tu comentario..."></textarea>
         <div class="obs-ft">
@@ -1116,7 +1129,43 @@ function toast(msg, tp = 'ok') {
   t.className = 'toast show' + (tp === 'err' ? ' err' : '');
   setTimeout(() => t.classList.remove('show'), 3500);
 }
+// ══════════════════════════════════════════════════════════════
+//  DESCARGAR WORD
+// ══════════════════════════════════════════════════════════════
+async function descargarWord() {
+  if (!expActivo) return;
+  const btn = document.getElementById('btn-word');
+  btn.disabled = true;
+  btn.innerHTML = '<span style="display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;margin-right:7px;vertical-align:middle"></span>Generando...';
 
+  try {
+    const resp = await fetch(`${API_URL}/api/expedientes/${expActivo.id}/generar-resumen`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err.error || 'Error ' + resp.status);
+    }
+
+    const blob = await resp.blob();
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = 'Expediente_' + expActivo.folio + '.docx';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast('Documento descargado correctamente.');
+
+  } catch (err) {
+    toast('Error: ' + err.message, 'err');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Descargar Resumen Word';
+  }
+}
 // ══════════════════════════════════════════════════════════════
 //  ARRANCAR
 // ══════════════════════════════════════════════════════════════
