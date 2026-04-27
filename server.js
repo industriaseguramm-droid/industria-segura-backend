@@ -1,5 +1,4 @@
 require('dotenv').config();
-
 const express = require('express');
 const cors    = require('cors');
 const morgan  = require('morgan');
@@ -11,6 +10,7 @@ const expRoutes    = require('./routes/expedientes.routes');
 const arcRoutes    = require('./routes/archivos.routes');
 const cliRoutes    = require('./routes/clientes.routes');
 const cfgRoutes    = require('./routes/configuracion.routes');
+const wordRoutes   = require('./routes/word');
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
@@ -52,6 +52,7 @@ app.get('/health', (req, res) => {
 app.use('/api/auth',          authRoutes);
 app.use('/api/portal',        portalRoutes);
 app.use('/api/expedientes',   expRoutes);
+app.use('/api/expedientes',   wordRoutes);
 app.use('/api/archivos',      arcRoutes);
 app.use('/api/clientes',      cliRoutes);
 app.use('/api/configuracion', cfgRoutes);
@@ -64,9 +65,11 @@ app.get('/', (req, res) => {
     portal: '/portal/TOKEN_DEL_CLIENTE'
   });
 });
+
 app.get('/panel', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'panel-interno-conectado.html'));
 });
+
 app.get('/portal/*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'portal-cliente-conectado.html'));
 });
