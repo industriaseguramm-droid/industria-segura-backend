@@ -8,7 +8,21 @@ const DEFAULTS = {
   submensaje: 'Captura la información de tu negocio para elaborar tu Plan de Contingencia.',
   logo_url: null,
   whatsapp: '',
-  campos_activos: null
+  campos_activos: null,
+  hero_badge: 'Reg. DPCE-APF-184-2026 · Guadalupe, N.L.',
+  hero_titulo: 'PROTEGE TU EMPRESA, EVITA MULTAS Y SANCIONES.',
+  hero_subtitulo: 'Consultoría en Seguridad Industrial y Protección Civil',
+  hero_descripcion: 'Especialistas en Programas Internos de Protección Civil, capacitación a brigadas, cumplimiento STPS y venta de equipos de emergencia para empresas en Nuevo León.',
+  stat_clientes: '+100',
+  stat_cursos: '20+',
+  stat_cobertura: 'NL',
+  contacto_telefono: '818-077-0841',
+  contacto_email: 'industriaseguramm@gmail.com',
+  contacto_municipio: 'Guadalupe, Nuevo León, México',
+  registro: 'Reg. DPCE-APF-184-2026',
+  whatsapp_numero: '528180770841',
+  instagram_url: 'https://www.instagram.com/industria_seguramm',
+  footer_descripcion: 'Consultoría en Seguridad Industrial y Protección Civil. Protege tu patrimonio, cumple la ley, evita multas y sanciones.'
 };
 
 const obtener = async (req, res) => {
@@ -18,12 +32,10 @@ const obtener = async (req, res) => {
       .select('*')
       .eq('id', 1)
       .single();
-
     if (error) {
       return res.json(DEFAULTS);
     }
-
-    res.json(data);
+    res.json({ ...DEFAULTS, ...data });
   } catch (err) {
     res.json(DEFAULTS);
   }
@@ -31,36 +43,19 @@ const obtener = async (req, res) => {
 
 const actualizar = async (req, res) => {
   try {
-    const {
-      color_primario,
-      color_secundario,
-      nombre_empresa,
-      mensaje_bienvenida,
-      submensaje,
-      whatsapp,
-      campos_activos
-    } = req.body;
+    const campos = { ...req.body, updated_at: new Date().toISOString() };
+    delete campos.id;
 
     const { data, error } = await supabase
       .from('configuracion')
-      .upsert({
-        id: 1,
-        color_primario: color_primario || DEFAULTS.color_primario,
-        color_secundario: color_secundario || DEFAULTS.color_secundario,
-        nombre_empresa: nombre_empresa || DEFAULTS.nombre_empresa,
-        mensaje_bienvenida: mensaje_bienvenida || DEFAULTS.mensaje_bienvenida,
-        submensaje: submensaje || DEFAULTS.submensaje,
-        whatsapp: whatsapp || '',
-        campos_activos: campos_activos || null,
-        updated_at: new Date().toISOString()
-      })
+      .update(campos)
+      .eq('id', 1)
       .select()
       .single();
 
     if (error) {
       return res.status(500).json({ error: error.message });
     }
-
     res.json({ mensaje: 'Configuración guardada correctamente', data });
   } catch (err) {
     res.status(500).json({ error: 'Error interno del servidor' });
@@ -72,12 +67,9 @@ const subirLogo = async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ error: 'No se recibió ninguna imagen' });
     }
-
     const ext = req.file.originalname.split('.').pop().toLowerCase();
     const nombrePath = `logo/logo-industria-segura.${ext}`;
-
     await supabase.storage.from('configuracion').remove([nombrePath]);
-
     const { error: uploadError } = await supabase
       .storage
       .from('configuracion')
@@ -85,19 +77,16 @@ const subirLogo = async (req, res) => {
         contentType: req.file.mimetype,
         upsert: true
       });
-
     if (uploadError) {
       return res.status(500).json({ error: uploadError.message });
     }
-
     const { data: urlData } = supabase.storage
       .from('configuracion')
       .getPublicUrl(nombrePath);
-
     await supabase
       .from('configuracion')
-      .upsert({ id: 1, logo_url: urlData.publicUrl, updated_at: new Date().toISOString() });
-
+      .update({ logo_url: urlData.publicUrl, updated_at: new Date().toISOString() })
+      .eq('id', 1);
     res.json({ mensaje: 'Logo actualizado correctamente', url: urlData.publicUrl });
   } catch (err) {
     res.status(500).json({ error: 'Error interno del servidor' });
