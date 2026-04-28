@@ -397,7 +397,7 @@ async function generarActaConstitutiva(req, res) {
     // PÁRRAFO INTRO — mezcla normal + itálicas para hora/día/mes
     children.push(new Paragraph({
       alignment: AlignmentType.JUSTIFIED,
-      spacing: { after: 200 },
+      spacing: { after: 160 },
       children: [
         new TextRun({ text: 'En el municipio de ' + (municipio || '_______________') + ', Nuevo León, siendo las ', size: 22 }),
         new TextRun({ text: '_____', italics: true, size: 22 }),
@@ -412,14 +412,14 @@ async function generarActaConstitutiva(req, res) {
     // NOMBRE ESTABLECIMIENTO — negrita, centrado, mayúsculas
     children.push(new Paragraph({
       alignment: AlignmentType.CENTER,
-      spacing: { after: 200 },
+      spacing: { after: 160 },
       children: [new TextRun({ text: nombreEst, bold: true, size: 22 })],
     }));
 
     // DOMICILIO — subrayado
     children.push(new Paragraph({
       alignment: AlignmentType.JUSTIFIED,
-      spacing: { after: 200 },
+      spacing: { after: 160 },
       children: [
         new TextRun({ text: 'Sita en ' + domCompleto + '. ', underline: {}, size: 22 }),
       ],
@@ -440,7 +440,7 @@ async function generarActaConstitutiva(req, res) {
     runsBrig.push(new TextRun({ text: String(totalBrigadistas), bold: true, size: 22 }));
     runsBrig.push(new TextRun({ text: ' empleados de dicho establecimiento con el objeto de constituir formalmente la Unidad Interna de Protección Civil de este inmueble.', size: 22 }));
 
-    children.push(new Paragraph({ alignment: AlignmentType.JUSTIFIED, spacing: { after: 200 }, children: runsBrig }));
+    children.push(new Paragraph({ alignment: AlignmentType.JUSTIFIED, spacing: { after: 160 }, children: runsBrig }));
 
     // TEXTO LEGAL
     children.push(new Paragraph({
@@ -450,11 +450,11 @@ async function generarActaConstitutiva(req, res) {
     }));
 
     // SECCIONES
-    children.push(new Paragraph({ alignment: AlignmentType.JUSTIFIED, spacing: { after: 120 }, children: [new TextRun({ text: '1. Objetivos:', bold: true, size: 22 })] }));
-    children.push(new Paragraph({ alignment: AlignmentType.JUSTIFIED, spacing: { after: 200 }, children: [new TextRun({ text: 'Adecuar el Reglamento Interior u Ordenamiento Jurídico correspondiente, para incluir las funciones de Protección Civil en esta Empresa; elaborar, establecer, operar y evaluar permanentemente el Programa Interno de Protección Civil, así como implantar los mecanismos de coordinación con la Empresas y Entidades Públicas y Sociales, en sus Niveles Federal, Estatal y Municipal que conforma el Sistema Nacional de Protección Civil, con el fin de cumplir con los objetivos del mismo, a través de la ejecución del programa, realizando actividades que conduzcan a salvaguardar la integridad física del personal, de las instalaciones de la unidad y su entorno.', size: 22 })] }));
+    children.push(new Paragraph({ alignment: AlignmentType.JUSTIFIED, spacing: { after: 100 }, children: [new TextRun({ text: '1. Objetivos:', bold: true, size: 24, font: 'Arial' })] }));
+    children.push(new Paragraph({ alignment: AlignmentType.JUSTIFIED, spacing: { after: 160 }, children: [new TextRun({ text: 'Adecuar el Reglamento Interior u Ordenamiento Jurídico correspondiente, para incluir las funciones de Protección Civil en esta Empresa; elaborar, establecer, operar y evaluar permanentemente el Programa Interno de Protección Civil, así como implantar los mecanismos de coordinación con la Empresas y Entidades Públicas y Sociales, en sus Niveles Federal, Estatal y Municipal que conforma el Sistema Nacional de Protección Civil, con el fin de cumplir con los objetivos del mismo, a través de la ejecución del programa, realizando actividades que conduzcan a salvaguardar la integridad física del personal, de las instalaciones de la unidad y su entorno.', size: 22 })] }));
 
-    children.push(new Paragraph({ alignment: AlignmentType.JUSTIFIED, spacing: { after: 120 }, children: [new TextRun({ text: '2. Integración.', bold: true, size: 22 })] }));
-children.push(new Paragraph({ alignment: AlignmentType.JUSTIFIED, spacing: { after: 400 }, children: [new TextRun({ text: 'Organigrama de la unidad interna de Protección Civil de esta Empresa', size: 22 })] }));
+    children.push(new Paragraph({ alignment: AlignmentType.JUSTIFIED, spacing: { after: 120 }, children: [new TextRun({ text: '2. Integración.', bold: true, size: 24, font: 'Arial' })] }));
+children.push(new Paragraph({ alignment: AlignmentType.JUSTIFIED, spacing: { after: 400 }, children: [new TextRun({ text: 'Organigrama de la unidad interna de Protección Civil de esta Empresa', size: 24, font: 'Arial' })] }));
 
 // Organigrama en dos columnas usando tabla invisible
 var orgRoles = [
