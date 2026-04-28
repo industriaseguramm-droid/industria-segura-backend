@@ -355,22 +355,6 @@ function obtenerBrigadistasDesdeJSON(datosJson) {
   return lista;
 }
 
-function parrafo(texto, opciones) {
-  var opts = opciones || {};
-  return new Paragraph({
-    alignment: opts.center ? AlignmentType.CENTER : (opts.right ? AlignmentType.RIGHT : AlignmentType.JUSTIFIED),
-    spacing: { before: opts.before || 0, after: opts.after || 120 },
-    children: [new TextRun({ text: texto || '', bold: opts.bold || false, size: opts.size || 22, color: opts.color || '000000', italics: opts.italics || false })],
-  });
-}
-
-function lineaFirma(label) {
-  return [
-    new Paragraph({ spacing: { before: 400, after: 40 }, children: [new TextRun({ text: '_'.repeat(45), size: 22 })] }),
-    new Paragraph({ spacing: { after: 80 }, children: [new TextRun({ text: label, bold: true, size: 20 })] }),
-  ];
-}
-
 // ══════════════════════════════════════════════════
 // GENERAR ACTA CONSTITUTIVA
 // ══════════════════════════════════════════════════
@@ -385,11 +369,11 @@ async function generarActaConstitutiva(req, res) {
     try { d = typeof expediente.datos_json === 'string' ? JSON.parse(expediente.datos_json) : expediente.datos_json || {}; } catch(e) { d = {}; }
 
     var gral = d.generales || {};
-    var municipio      = (gral.municipio && gral.municipio.valor) || '';
-    var nombreEst      = (gral.nombre_comercial && gral.nombre_comercial.valor) || '_______________';
-    var domicilio      = (gral.domicilio && gral.domicilio.valor) || '_______________';
-    var representante  = (gral.representante_legal && gral.representante_legal.valor) || '_______________';
-    var trabajadores   = (gral.trabajadores && gral.trabajadores.valor) || '___';
+    var municipio     = (gral.municipio && gral.municipio.valor) || '';
+    var nombreEst     = ((gral.nombre_comercial && gral.nombre_comercial.valor) || '_______________').toUpperCase();
+    var domicilio     = (gral.domicilio && gral.domicilio.valor) || '_______________';
+    var cp            = (gral.codigo_postal && gral.codigo_postal.valor) || '';
+    var trabajadores  = (gral.trabajadores && gral.trabajadores.valor) || '___';
 
     var director = obtenerDirector(municipio);
     var brigadistas = obtenerBrigadistasDesdeJSON(d);
@@ -399,41 +383,84 @@ async function generarActaConstitutiva(req, res) {
     var dia   = fecha.getDate();
     var mes   = fecha.toLocaleString('es-MX', { month: 'long' });
     var anio  = fecha.getFullYear();
+    var domCompleto = domicilio + (cp ? ', C.P. ' + cp : '') + ', ' + (municipio || '_______________') + ', Nuevo León, México';
 
     var children = [];
 
-    children.push(parrafo('Acta Constitutiva de la Unidad Interna de Protección Civil del Establecimiento', { bold: true, size: 26, center: true, after: 300 }));
+    // TÍTULO
+    children.push(new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { before: 0, after: 300 },
+      children: [new TextRun({ text: '\u201cActa Constitutiva de la Unidad Interna de Protección Civil del Establecimiento\u201d', bold: true, size: 24 })],
+    }));
 
-    children.push(parrafo(
-      'En el municipio de ' + (municipio || '_______________') + ', Nuevo León, siendo las _____ horas del día ' + dia + ' del mes de ' + mes + ' de ' + anio + ', reunidos en las instalaciones de:',
-      { after: 200 }
-    ));
+    // PÁRRAFO INTRO — mezcla normal + itálicas para hora/día/mes
+    children.push(new Paragraph({
+      alignment: AlignmentType.JUSTIFIED,
+      spacing: { after: 200 },
+      children: [
+        new TextRun({ text: 'En el municipio de ' + (municipio || '_______________') + ', Nuevo León, siendo las ', size: 22 }),
+        new TextRun({ text: '_____', italics: true, size: 22 }),
+        new TextRun({ text: ' horas del día ', size: 22 }),
+        new TextRun({ text: String(dia), italics: true, size: 22 }),
+        new TextRun({ text: ' del mes de ', size: 22 }),
+        new TextRun({ text: mes, italics: true, size: 22 }),
+        new TextRun({ text: ' de ' + anio + ', reunidos en las instalaciones de:', size: 22 }),
+      ],
+    }));
 
-    children.push(parrafo(nombreEst, { bold: true, center: true, size: 24, after: 100 }));
-    children.push(parrafo('Sita en ' + domicilio + ', ' + (municipio || '_______________') + ', Nuevo León, México.', { after: 200 }));
+    // NOMBRE ESTABLECIMIENTO — negrita, centrado, mayúsculas
+    children.push(new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 200 },
+      children: [new TextRun({ text: nombreEst, bold: true, size: 22 })],
+    }));
 
-    // Nombres de brigadistas
-    var nombresBrigadistas = brigadistas.map(function(b) { return 'C. ' + b.nombre; }).join(', ');
-    if (!nombresBrigadistas) nombresBrigadistas = 'C. _______________, C. _______________';
+    // DOMICILIO — subrayado
+    children.push(new Paragraph({
+      alignment: AlignmentType.JUSTIFIED,
+      spacing: { after: 200 },
+      children: [
+        new TextRun({ text: 'Sita en ' + domCompleto + '. ', underline: {}, size: 22 }),
+      ],
+    }));
 
-    children.push(parrafo(
-      'Los ' + nombresBrigadistas + ', así como el ' + director.titulo + ' ' + director.nombre + ', ' + director.puesto + '; participan también en esta reunión ' + totalBrigadistas + ' empleados de dicho establecimiento con el objeto de constituir formalmente la Unidad Interna de Protección Civil de este inmueble.',
-      { after: 300 }
-    ));
+    // PÁRRAFO BRIGADISTAS — nombres en negrita
+    var runsBrig = [new TextRun({ text: 'Los ', size: 22 })];
+    brigadistas.forEach(function(b, idx) {
+      if (idx > 0) runsBrig.push(new TextRun({ text: ', C. ', size: 22 }));
+      runsBrig.push(new TextRun({ text: b.nombre, bold: true, size: 22 }));
+    });
+    if (brigadistas.length === 0) {
+      runsBrig.push(new TextRun({ text: '_______________, C. _______________', bold: true, size: 22 }));
+    }
+    runsBrig.push(new TextRun({ text: ', así como el ', size: 22 }));
+    runsBrig.push(new TextRun({ text: director.titulo + ' ' + director.nombre, bold: true, size: 22 }));
+    runsBrig.push(new TextRun({ text: ', ' + director.puesto + '; participan también en esta reunión ', size: 22 }));
+    runsBrig.push(new TextRun({ text: String(totalBrigadistas), bold: true, size: 22 }));
+    runsBrig.push(new TextRun({ text: ' empleados de dicho establecimiento con el objeto de constituir formalmente la Unidad Interna de Protección Civil de este inmueble.', size: 22 }));
 
-    // Texto legal
-    var textoLegal = 'Como consecuencia de los sucesos ocurridos en el año de 1985, el Gobierno Federal decidió instrumentar un sistema que permitiese una respuesta eficaz y eficiente de los diversos sectores de la sociedad ante la presencia de desastres naturales y/o humanos, con el propósito de prevenir sus consecuencias o en su caso mitigarlas, por lo antes expuesto, con fundamento en el decreto por el que se aprueban las bases para el establecimiento del Sistema Nacional de Protección Civil, Diario Oficial de la Federación del 6 de Mayo de 1986. Organización. Órgano Ejecutivo y compromisos de participación. Publicación de la Coordinación de Protección Civil del año de 1987. Decretado por el que se crea el Consejo Nacional de Protección Civil. Diario Oficial de la Federación del 11 de Mayo de 1990 y Programa Nacional de Protección Civil de 1995 - 2000. Diario Oficial de la Federación del 15 de Julio de 1996. Ley de Protección Civil y su Reglamento Operativo para el Estado de Nuevo León del 22 de Enero de 1997. La Unidad Interna de Protección Civil, cuyos objetivos, es la integración y funciones que se indican a continuación.';
-    children.push(parrafo(textoLegal, { after: 200 }));
+    children.push(new Paragraph({ alignment: AlignmentType.JUSTIFIED, spacing: { after: 200 }, children: runsBrig }));
 
-    children.push(parrafo('1. Objetivos:', { bold: true, after: 100 }));
-    children.push(parrafo('Adecuar el Reglamento Interior u Ordenamiento Jurídico correspondiente, para incluir las funciones de Protección Civil en esta Empresa; elaborar, establecer, operar y evaluar permanentemente el Programa Interno de Protección Civil, así como implantar los mecanismos de coordinación con la Empresas y Entidades Públicas y Sociales, en sus Niveles Federal, Estatal y Municipal que conforma el Sistema Nacional de Protección Civil, con el fin de cumplir con los objetivos del mismo, a través de la ejecución del programa, realizando actividades que conduzcan a salvaguardar la integridad física del personal, de las instalaciones de la unidad y su entorno.', { after: 200 }));
+    // TEXTO LEGAL
+    children.push(new Paragraph({
+      alignment: AlignmentType.JUSTIFIED,
+      spacing: { after: 200 },
+      children: [new TextRun({ text: 'Como consecuencia de los sucesos ocurridos en el año de 1985, el Gobierno Federal decidió instrumentar un sistema que permitiese una respuesta eficaz y eficiente de los diversos sectores de la sociedad ante la presencia de desastres naturales y/o humanos, con el propósito de prevenir sus consecuencias o en su caso mitigarlas, por lo antes expuesto, con fundamento en el decreto por el que se aprueban las bases para el establecimiento del Sistema Nacional de Protección Civil, Diario Oficial de la Federación del 6 de Mayo de 1986. Organización. Órgano Ejecutivo y compromisos de participación. Publicación de la Coordinación de Protección Civil del año de 1987. Decretado por el que se crea el Consejo Nacional de Protección Civil. Diario Oficial de la Federación del 11 de Mayo de 1990 y Programa Nacional de Protección Civil de 1995 - 2000. Diario Oficial de la Federación del 15 de Julio de 1996. Ley de Protección Civil y su Reglamento Operativo para el Estado de Nuevo León del 22 de Enero de 1997. La Unidad Interna de Protección Civil, cuyos objetivos, es la integración y funciones que se indican a continuación.', size: 22 })],
+    }));
 
-    children.push(parrafo('2. Integración.', { bold: true, after: 100 }));
-    children.push(parrafo('Organigrama de la unidad interna de Protección Civil de esta Empresa', { after: 80 }));
-    children.push(parrafo('Director de Protección Civil de ' + (municipio || '_______________') + ', Nuevo León', { after: 40 }));
-    children.push(parrafo(director.titulo + ' ' + director.nombre, { bold: true, after: 200 }));
+    // SECCIONES
+    children.push(new Paragraph({ alignment: AlignmentType.JUSTIFIED, spacing: { after: 120 }, children: [new TextRun({ text: '1. Objetivos:', bold: true, size: 22 })] }));
+    children.push(new Paragraph({ alignment: AlignmentType.JUSTIFIED, spacing: { after: 200 }, children: [new TextRun({ text: 'Adecuar el Reglamento Interior u Ordenamiento Jurídico correspondiente, para incluir las funciones de Protección Civil en esta Empresa; elaborar, establecer, operar y evaluar permanentemente el Programa Interno de Protección Civil, así como implantar los mecanismos de coordinación con la Empresas y Entidades Públicas y Sociales, en sus Niveles Federal, Estatal y Municipal que conforma el Sistema Nacional de Protección Civil, con el fin de cumplir con los objetivos del mismo, a través de la ejecución del programa, realizando actividades que conduzcan a salvaguardar la integridad física del personal, de las instalaciones de la unidad y su entorno.', size: 22 })] }));
 
-    children.push(parrafo('3. Funciones:', { bold: true, after: 100 }));
+    children.push(new Paragraph({ alignment: AlignmentType.JUSTIFIED, spacing: { after: 120 }, children: [new TextRun({ text: '2. Integración.', bold: true, size: 22 })] }));
+    children.push(new Paragraph({ alignment: AlignmentType.JUSTIFIED, spacing: { after: 80 }, children: [new TextRun({ text: 'Organigrama de la unidad interna de Protección Civil de esta Empresa', size: 22 })] }));
+    children.push(new Paragraph({ alignment: AlignmentType.JUSTIFIED, spacing: { after: 60 }, children: [new TextRun({ text: 'Director de Protección Civil de ' + (municipio || '_______________') + ', Nuevo León', size: 22 })] }));
+    children.push(new Paragraph({ alignment: AlignmentType.JUSTIFIED, spacing: { after: 200 }, children: [new TextRun({ text: director.titulo + ' ' + director.nombre, bold: true, size: 22 })] }));
+
+    children.push(new Paragraph({ alignment: AlignmentType.JUSTIFIED, spacing: { after: 120 }, children: [new TextRun({ text: '3. Funciones:', bold: true, size: 22 })] }));
+    children.push(new Paragraph({ alignment: AlignmentType.JUSTIFIED, spacing: { after: 100 }, children: [new TextRun({ text: 'Corresponde a los integrantes de la Unidad Interna de Protección Civil, llevar a cabo las siguientes funciones:', size: 22 })] }));
+
     var funciones = [
       'Diseñar y promover la impartición de cursos de capacitación a los integrantes de las Brigadas Internas de Protección Civil.',
       'Elaborar el diagnóstico de riesgos a los que está expuesta la zona donde se ubica el inmueble.',
@@ -449,49 +476,63 @@ async function generarActaConstitutiva(req, res) {
       'Elaborar y distribuir material de difusión y concientización para el personal que labora en la Empresa. A fin de estar preparados para una contingencia, elaborar un plan de reconstrucción inicial, para restablecer las condiciones normales de operación del inmueble.',
     ];
     funciones.forEach(function(f) {
-      children.push(new Paragraph({ spacing: { after: 80 }, bullet: { level: 0 }, children: [new TextRun({ text: f, size: 22 })] }));
-    });
-
-    children.push(parrafo('4. Esquema Organizacional:', { bold: true, before: 200, after: 100 }));
-    children.push(parrafo('Para que la Unidad Interna de Protección Civil logre los objetivos y desempeñe las funciones antes descritas, contará con la estructura organizacional incluida en la presente acta.', { after: 200 }));
-
-    children.push(parrafo(
-      'Siendo las _____ horas de la misma fecha arriba señalada, queda constituida la presente Acta Constitutiva de la Unidad Interna de Protección Civil de la Empresa antes señalada, firmando de conformidad al margen y al calce, todos los que en ella intervinieron para su legalidad y constancia.',
-      { after: 300 }
-    ));
-
-    // Tabla de firmas
-    var firmaRows = [];
-    var encabezadoFirma = new TableRow({
-      children: [
-        new TableCell({ shading: { fill: '2E75B6' }, children: [new Paragraph({ children: [new TextRun({ text: 'NOMBRE', bold: true, size: 20, color: 'FFFFFF' })] })] }),
-        new TableCell({ shading: { fill: '2E75B6' }, children: [new Paragraph({ children: [new TextRun({ text: '', bold: true, size: 20, color: 'FFFFFF' })] })] }),
-        new TableCell({ shading: { fill: '2E75B6' }, children: [new Paragraph({ children: [new TextRun({ text: 'FIRMA', bold: true, size: 20, color: 'FFFFFF' })] })] }),
-      ]
-    });
-    firmaRows.push(encabezadoFirma);
-
-    var filasBrigadistas = brigadistas.length > 0 ? brigadistas : [{ nombre: '' }, { nombre: '' }, { nombre: '' }, { nombre: '' }, { nombre: '' }];
-    filasBrigadistas.forEach(function(b) {
-      firmaRows.push(new TableRow({
-        children: [
-          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: b.nombre || '', size: 20 })] })] }),
-          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: '', size: 20 })] })] }),
-          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: '', size: 20 })] })] }),
-        ]
+      children.push(new Paragraph({
+        alignment: AlignmentType.JUSTIFIED,
+        spacing: { after: 80 },
+        indent: { left: 360 },
+        children: [new TextRun({ text: '- ' + f, size: 22 })],
       }));
     });
 
+    children.push(new Paragraph({ alignment: AlignmentType.JUSTIFIED, spacing: { before: 200, after: 120 }, children: [new TextRun({ text: '4. Esquema Organizacional:', bold: true, size: 22 })] }));
+    children.push(new Paragraph({ alignment: AlignmentType.JUSTIFIED, spacing: { after: 200 }, children: [new TextRun({ text: 'Para que la Unidad Interna de Protección Civil logre los objetivos y desempeñe las funciones antes descritas, contará con la estructura organizacional incluida en la presente acta.', size: 22 })] }));
+
+    children.push(new Paragraph({
+      alignment: AlignmentType.JUSTIFIED,
+      spacing: { after: 300 },
+      children: [
+        new TextRun({ text: 'Siendo las ', size: 22 }),
+        new TextRun({ text: '_____', bold: true, size: 22 }),
+        new TextRun({ text: ' horas de la misma fecha arriba señalada, queda constituida la presente Acta Constitutiva de la Unidad Interna de Protección Civil de la Empresa antes señalada, firmando de conformidad al margen y al calce, todos los que en ella intervinieron para su legalidad y constancia.', size: 22 }),
+      ],
+    }));
+
+    // TABLA DE FIRMAS con nombres de brigadistas
+    var border1 = { style: BorderStyle.SINGLE, size: 1, color: '000000' };
+    var borders1 = { top: border1, bottom: border1, left: border1, right: border1 };
+
+    var headerRow = new TableRow({
+      children: [
+        new TableCell({ borders: borders1, width: { size: 4320, type: WidthType.DXA }, shading: { fill: 'FFFFFF', type: ShadingType.CLEAR }, margins: { top: 80, bottom: 80, left: 120, right: 120 }, children: [new Paragraph({ children: [new TextRun({ text: 'NOMBRE', bold: true, size: 22 })] })] }),
+        new TableCell({ borders: borders1, width: { size: 720, type: WidthType.DXA }, shading: { fill: 'FFFFFF', type: ShadingType.CLEAR }, margins: { top: 80, bottom: 80, left: 120, right: 120 }, children: [new Paragraph({ children: [new TextRun({ text: '', size: 22 })] })] }),
+        new TableCell({ borders: borders1, width: { size: 4320, type: WidthType.DXA }, shading: { fill: 'FFFFFF', type: ShadingType.CLEAR }, margins: { top: 80, bottom: 80, left: 120, right: 120 }, children: [new Paragraph({ children: [new TextRun({ text: 'FIRMA', bold: true, size: 22 })] })] }),
+      ]
+    });
+
+    var filasFirma = brigadistas.length > 0 ? brigadistas : [{nombre:''},{nombre:''},{nombre:''},{nombre:''},{nombre:''},{nombre:''},{nombre:''},{nombre:''},{nombre:''}];
+    var filas = filasFirma.map(function(b) {
+      return new TableRow({
+        children: [
+          new TableCell({ borders: borders1, width: { size: 4320, type: WidthType.DXA }, shading: { fill: 'FFFFFF', type: ShadingType.CLEAR }, margins: { top: 120, bottom: 120, left: 120, right: 120 }, children: [new Paragraph({ children: [new TextRun({ text: b.nombre || '', size: 22 })] })] }),
+          new TableCell({ borders: borders1, width: { size: 720, type: WidthType.DXA }, shading: { fill: 'FFFFFF', type: ShadingType.CLEAR }, margins: { top: 120, bottom: 120, left: 120, right: 120 }, children: [new Paragraph({ children: [new TextRun({ text: '', size: 22 })] })] }),
+          new TableCell({ borders: borders1, width: { size: 4320, type: WidthType.DXA }, shading: { fill: 'FFFFFF', type: ShadingType.CLEAR }, margins: { top: 120, bottom: 120, left: 120, right: 120 }, children: [new Paragraph({ children: [new TextRun({ text: '', size: 22 })] })] }),
+        ]
+      });
+    });
+
     children.push(new Table({
-      width: { size: 100, type: WidthType.PERCENTAGE },
-      rows: firmaRows,
-      borders: { top: { style: BorderStyle.SINGLE, size: 1 }, bottom: { style: BorderStyle.SINGLE, size: 1 }, left: { style: BorderStyle.SINGLE, size: 1 }, right: { style: BorderStyle.SINGLE, size: 1 }, insideH: { style: BorderStyle.SINGLE, size: 1 }, insideV: { style: BorderStyle.SINGLE, size: 1 } },
+      width: { size: 9360, type: WidthType.DXA },
+      columnWidths: [4320, 720, 4320],
+      rows: [headerRow].concat(filas),
     }));
 
     var documento = new Document({
       creator: 'Industria Segura MM',
       title: 'Acta Constitutiva ' + nombreEst,
-      sections: [{ children: children }],
+      sections: [{
+        properties: { page: { size: { width: 12240, height: 15840 }, margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 } } },
+        children: children
+      }],
     });
 
     var bufferFinal = await Packer.toBuffer(documento);
@@ -519,12 +560,12 @@ async function generarResponsiva(req, res) {
     try { d = typeof expediente.datos_json === 'string' ? JSON.parse(expediente.datos_json) : expediente.datos_json || {}; } catch(e) { d = {}; }
 
     var gral = d.generales || {};
-    var municipio      = (gral.municipio && gral.municipio.valor) || '';
-    var nombreEst      = (gral.nombre_comercial && gral.nombre_comercial.valor) || '_______________';
-    var domicilio      = (gral.domicilio && gral.domicilio.valor) || '_______________';
-    var cp             = (gral.codigo_postal && gral.codigo_postal.valor) || '';
-    var representante  = (gral.representante_legal && gral.representante_legal.valor) || '_______________';
-    var razonSocial    = (gral.razon_social && gral.razon_social.valor) || nombreEst;
+    var municipio     = (gral.municipio && gral.municipio.valor) || '';
+    var nombreEst     = ((gral.nombre_comercial && gral.nombre_comercial.valor) || '_______________').toUpperCase();
+    var domicilio     = (gral.domicilio && gral.domicilio.valor) || '_______________';
+    var cp            = (gral.codigo_postal && gral.codigo_postal.valor) || '';
+    var representante = (gral.representante_legal && gral.representante_legal.valor) || '_______________';
+    var razonSocial   = ((gral.razon_social && gral.razon_social.valor) || (gral.nombre_comercial && gral.nombre_comercial.valor) || '_______________').toUpperCase();
 
     var director = obtenerDirector(municipio);
 
@@ -536,50 +577,73 @@ async function generarResponsiva(req, res) {
 
     var children = [];
 
-    // Encabezado fecha y destinatario
-    children.push(parrafo((municipio || '_______________') + ', N. L. a ' + dia + ' de ' + mes + ' del ' + anio, { right: true, after: 300 }));
-    children.push(parrafo(director.titulo + ' ' + director.nombre, { bold: true, after: 60 }));
-    children.push(parrafo(director.puesto, { after: 60 }));
-    children.push(parrafo('Presente. -', { after: 300 }));
+    // FECHA — alineada a la derecha
+    children.push(new Paragraph({
+      alignment: AlignmentType.RIGHT,
+      spacing: { after: 400 },
+      children: [new TextRun({ text: (municipio || '_______________') + ', N. L. a ' + dia + ' de ' + mes + ' del ' + anio, size: 22 })],
+    }));
 
-    // Cuerpo
-    children.push(parrafo(
-      'Me permito informarle que el Plan de Contingencias del inmueble que se ha desarrollado conforme a lo establecido en el Capitulo VIII, Artículos 45 y 47 de la Ley de Protección Civil para el Estado de Nuevo León, publicada el 22 de Enero de 1997.',
-      { after: 200 }
-    ));
+    // DESTINATARIO
+    children.push(new Paragraph({ spacing: { after: 60 }, children: [new TextRun({ text: director.titulo + ' ' + director.nombre, size: 22 })] }));
+    children.push(new Paragraph({ spacing: { after: 60 }, children: [new TextRun({ text: director.puesto, size: 22 })] }));
+    children.push(new Paragraph({ spacing: { after: 400 }, children: [new TextRun({ text: 'Presente. -', size: 22 })] }));
 
-    children.push(parrafo(
-      'Solo la Dirección General puede autorizar modificaciones o cambios al presente documento. La distribución del mismo es para los jefes de departamento del inmueble y siempre deberá de estar disponible como consulta para los integrantes de las brigadas de emergencia y el personal que labora en este inmueble.',
-      { after: 200 }
-    ));
+    // CUERPO
+    children.push(new Paragraph({
+      alignment: AlignmentType.JUSTIFIED,
+      spacing: { after: 200 },
+      children: [new TextRun({ text: 'Me permito informarle que el Plan de Contingencias del inmueble que se ha desarrollado conforme a lo establecido en el Capitulo VIII, Artículos 45 y 47 de la Ley de Protección Civil para el Estado de Nuevo León, publicada el 22 de Enero de 1997.', size: 22 })],
+    }));
 
-    children.push(parrafo(
-      'Así mismo hago constar que el inmueble cumple en su totalidad con los aspectos de seguridad, con las medidas de prevención de riesgos y de seguridad requeridas para el adecuado y seguro funcionamiento del establecimiento denominado ' + nombreEst,
-      { after: 400 }
-    ));
+    children.push(new Paragraph({
+      alignment: AlignmentType.JUSTIFIED,
+      spacing: { after: 200 },
+      children: [new TextRun({ text: 'Solo la Dirección General puede autorizar modificaciones o cambios al presente documento. La distribución del mismo es para los jefes de departamento del inmueble y siempre deberá de estar disponible como consulta para los integrantes de las brigadas de emergencia y el personal que labora en este inmueble.', size: 22 })],
+    }));
 
-    // Firma Abel
-    children.push(parrafo('Abel Alejandro Morales Puente', { center: true, after: 40 }));
-    children.push(parrafo('No. Reg. ' + director.registro, { center: true, after: 40 }));
-    children.push(parrafo('Nombre, Firma, No. de Registro', { center: true, italics: true, after: 40 }));
-    children.push(parrafo('Asesor de Protección Civil', { center: true, after: 400 }));
+    // PÁRRAFO CON NOMBRE EN NEGRITAS
+    children.push(new Paragraph({
+      alignment: AlignmentType.JUSTIFIED,
+      spacing: { after: 600 },
+      children: [
+        new TextRun({ text: 'Así mismo hago constar que el inmueble cumple en su totalidad con los aspectos de seguridad, con las medidas de prevención de riesgos y de seguridad requeridas para el adecuado y seguro funcionamiento del establecimiento denominado ', size: 22 }),
+        new TextRun({ text: nombreEst, bold: true, size: 22 }),
+      ],
+    }));
 
-    // Texto representante
-    children.push(parrafo(
-      'En total acuerdo con el contenido del presente Plan de Contingencias y con la responsabilidad de mantener las instalaciones en total apego a las medidas de prevención de riesgos y de seguridad Federales, Estatales y Municipales que aplican al inmueble ' + nombreEst + ', ubicado en ' + domCompleto + '. Autorizo que el Plan de Contingencias sea presentado ante la Dirección Municipal de Protección Civil, para su revisión y registro.',
-      { after: 400 }
-    ));
+    // FIRMA ABEL — con espacio para firma
+    children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 60 }, children: [new TextRun({ text: 'Abel Alejandro Morales Puente', size: 22 })] }));
+    children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 60 }, children: [new TextRun({ text: 'No. Reg. ' + director.registro, size: 22 })] }));
+    children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 60 }, children: [new TextRun({ text: 'Nombre, Firma, No. de Registro', italics: true, size: 22 })] }));
+    children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 600 }, children: [new TextRun({ text: 'Asesor de Protección Civil', size: 22 })] }));
 
-    // Firma representante
-    children.push(parrafo(representante, { center: true, after: 40 }));
-    children.push(parrafo('Nombre y Firma', { center: true, italics: true, after: 40 }));
-    children.push(parrafo('Representante Legal', { center: true, after: 40 }));
-    children.push(parrafo(razonSocial, { center: true, bold: true, after: 40 }));
+    // PÁRRAFO REPRESENTANTE CON NOMBRE Y DIRECCIÓN EN NEGRITAS/SUBRAYADO
+    children.push(new Paragraph({
+      alignment: AlignmentType.JUSTIFIED,
+      spacing: { after: 600 },
+      children: [
+        new TextRun({ text: 'En total acuerdo con el contenido del presente Plan de Contingencias y con la responsabilidad de mantener las instalaciones en total apego a las medidas de prevención de riesgos y de seguridad Federales, Estatales y Municipales que aplican al inmueble ', size: 22 }),
+        new TextRun({ text: nombreEst, bold: true, size: 22 }),
+        new TextRun({ text: ', ubicado en ', size: 22 }),
+        new TextRun({ text: domCompleto, underline: {}, size: 22 }),
+        new TextRun({ text: '. Autorizo que el Plan de Contingencias sea presentado ante la Dirección Municipal de Protección Civil, para su revisión y registro.', size: 22 }),
+      ],
+    }));
+
+    // FIRMA REPRESENTANTE — con espacio para firma
+    children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 60 }, children: [new TextRun({ text: representante, size: 22 })] }));
+    children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 60 }, children: [new TextRun({ text: 'Nombre y Firma', italics: true, size: 22 })] }));
+    children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 60 }, children: [new TextRun({ text: 'Representante Legal', size: 22 })] }));
+    children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 60 }, children: [new TextRun({ text: razonSocial, bold: true, size: 22 })] }));
 
     var documento = new Document({
       creator: 'Industria Segura MM',
       title: 'Responsiva ' + nombreEst,
-      sections: [{ children: children }],
+      sections: [{
+        properties: { page: { size: { width: 12240, height: 15840 }, margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 } } },
+        children: children
+      }],
     });
 
     var bufferFinal = await Packer.toBuffer(documento);
