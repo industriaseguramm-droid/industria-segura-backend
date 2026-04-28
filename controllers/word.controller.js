@@ -391,7 +391,7 @@ async function generarActaConstitutiva(req, res) {
     children.push(new Paragraph({
       alignment: AlignmentType.CENTER,
       spacing: { before: 0, after: 300 },
-      children: [new TextRun({ text: '\u201cActa Constitutiva de la Unidad Interna de Protección Civil del Establecimiento\u201d', bold: true, size: 24 })],
+      children: [new TextRun({ text: '\u201cActa Constitutiva de la Unidad Interna de Protección Civil del Establecimiento\u201d', bold: true, size: 28 })],
     }));
 
     // PÁRRAFO INTRO — mezcla normal + itálicas para hora/día/mes
@@ -454,9 +454,59 @@ async function generarActaConstitutiva(req, res) {
     children.push(new Paragraph({ alignment: AlignmentType.JUSTIFIED, spacing: { after: 200 }, children: [new TextRun({ text: 'Adecuar el Reglamento Interior u Ordenamiento Jurídico correspondiente, para incluir las funciones de Protección Civil en esta Empresa; elaborar, establecer, operar y evaluar permanentemente el Programa Interno de Protección Civil, así como implantar los mecanismos de coordinación con la Empresas y Entidades Públicas y Sociales, en sus Niveles Federal, Estatal y Municipal que conforma el Sistema Nacional de Protección Civil, con el fin de cumplir con los objetivos del mismo, a través de la ejecución del programa, realizando actividades que conduzcan a salvaguardar la integridad física del personal, de las instalaciones de la unidad y su entorno.', size: 22 })] }));
 
     children.push(new Paragraph({ alignment: AlignmentType.JUSTIFIED, spacing: { after: 120 }, children: [new TextRun({ text: '2. Integración.', bold: true, size: 22 })] }));
-    children.push(new Paragraph({ alignment: AlignmentType.JUSTIFIED, spacing: { after: 80 }, children: [new TextRun({ text: 'Organigrama de la unidad interna de Protección Civil de esta Empresa', size: 22 })] }));
-    children.push(new Paragraph({ alignment: AlignmentType.JUSTIFIED, spacing: { after: 60 }, children: [new TextRun({ text: 'Director de Protección Civil de ' + (municipio || '_______________') + ', Nuevo León', size: 22 })] }));
-    children.push(new Paragraph({ alignment: AlignmentType.JUSTIFIED, spacing: { after: 200 }, children: [new TextRun({ text: director.titulo + ' ' + director.nombre, bold: true, size: 22 })] }));
+children.push(new Paragraph({ alignment: AlignmentType.JUSTIFIED, spacing: { after: 400 }, children: [new TextRun({ text: 'Organigrama de la unidad interna de Protección Civil de esta Empresa', size: 22 })] }));
+
+// Organigrama en dos columnas usando tabla invisible
+var orgRoles = [
+  { puesto: 'Presidente de la Unidad Interna', brigadista: brigadistas.find(function(b){ return b.rol && b.rol.toLowerCase().includes('presidente'); }) },
+  { puesto: 'Secretario Ejecutivo', brigadista: brigadistas.find(function(b){ return b.rol && b.rol.toLowerCase().includes('secretario'); }) },
+  { puesto: 'Director de la Unidad Interna', brigadista: brigadistas.find(function(b){ return b.rol && b.rol.toLowerCase().includes('director'); }) },
+  { puesto: 'Suplente', brigadista: brigadistas.find(function(b){ return b.rol && b.rol.toLowerCase().includes('suplente'); }) },
+  { puesto: 'Brigadista de Búsqueda y Rescate', brigadista: brigadistas.find(function(b){ return b.rol && b.rol.toLowerCase().includes('rescate'); }) },
+  { puesto: 'Brigadista de evacuación del Inmueble', brigadista: brigadistas.find(function(b){ return b.rol && b.rol.toLowerCase().includes('evacuaci'); }) },
+  { puesto: 'Brigadista de Primeros Auxilios', brigadista: brigadistas.find(function(b){ return b.rol && b.rol.toLowerCase().includes('auxilios'); }) },
+  { puesto: 'Brigadista de Combate Contra Incendios', brigadista: brigadistas.find(function(b){ return b.rol && b.rol.toLowerCase().includes('incendio'); }) },
+];
+
+var noBorder = { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' };
+var noBorders = { top: noBorder, bottom: noBorder, left: noBorder, right: noBorder };
+
+for (var oi = 0; oi < orgRoles.length; oi += 2) {
+  var izq = orgRoles[oi];
+  var der = orgRoles[oi + 1];
+  children.push(new Table({
+    width: { size: 9360, type: WidthType.DXA },
+    columnWidths: [4680, 4680],
+    rows: [new TableRow({
+      children: [
+        new TableCell({
+          borders: noBorders,
+          width: { size: 4680, type: WidthType.DXA },
+          shading: { fill: 'FFFFFF', type: ShadingType.CLEAR },
+          margins: { top: 200, bottom: 80, left: 120, right: 120 },
+          children: [
+            new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: izq.puesto, underline: {}, size: 22 })] }),
+            new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: izq.brigadista ? izq.brigadista.nombre : '_______________', bold: true, size: 22 })] }),
+          ]
+        }),
+        new TableCell({
+          borders: noBorders,
+          width: { size: 4680, type: WidthType.DXA },
+          shading: { fill: 'FFFFFF', type: ShadingType.CLEAR },
+          margins: { top: 200, bottom: 80, left: 120, right: 120 },
+          children: der ? [
+            new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: der.puesto, underline: {}, size: 22 })] }),
+            new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: der.brigadista ? der.brigadista.nombre : '_______________', bold: true, size: 22 })] }),
+          ] : [new Paragraph({ children: [new TextRun({ text: '' })] })],
+        }),
+      ]
+    })],
+  }));
+}
+
+// Director de PC al final del organigrama
+children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 400, after: 60 }, children: [new TextRun({ text: 'Director de Protección Civil de ' + (municipio || '_______________') + ', Nuevo León', size: 22 })] }));
+children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 300 }, children: [new TextRun({ text: director.titulo + ' ' + director.nombre, bold: true, size: 22 })] }));
 
     children.push(new Paragraph({ alignment: AlignmentType.JUSTIFIED, spacing: { after: 120 }, children: [new TextRun({ text: '3. Funciones:', bold: true, size: 22 })] }));
     children.push(new Paragraph({ alignment: AlignmentType.JUSTIFIED, spacing: { after: 100 }, children: [new TextRun({ text: 'Corresponde a los integrantes de la Unidad Interna de Protección Civil, llevar a cabo las siguientes funciones:', size: 22 })] }));
@@ -585,9 +635,9 @@ async function generarResponsiva(req, res) {
     }));
 
     // DESTINATARIO
-    children.push(new Paragraph({ spacing: { after: 60 }, children: [new TextRun({ text: director.titulo + ' ' + director.nombre, size: 22 })] }));
-    children.push(new Paragraph({ spacing: { after: 60 }, children: [new TextRun({ text: director.puesto, size: 22 })] }));
-    children.push(new Paragraph({ spacing: { after: 400 }, children: [new TextRun({ text: 'Presente. -', size: 22 })] }));
+    children.push(new Paragraph({ spacing: { after: 60 }, children: [new TextRun({ text: director.titulo + ' ' + director.nombre, bold: true, size: 22 })] }));
+children.push(new Paragraph({ spacing: { after: 60 }, children: [new TextRun({ text: director.puesto, size: 22 })] }));
+children.push(new Paragraph({ spacing: { after: 400 }, children: [new TextRun({ text: 'Presente. -', size: 22 })] }));
 
     // CUERPO
     children.push(new Paragraph({
@@ -616,7 +666,7 @@ async function generarResponsiva(req, res) {
     children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 60 }, children: [new TextRun({ text: 'Abel Alejandro Morales Puente', size: 22 })] }));
     children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 60 }, children: [new TextRun({ text: 'No. Reg. ' + director.registro, size: 22 })] }));
     children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 60 }, children: [new TextRun({ text: 'Nombre, Firma, No. de Registro', italics: true, size: 22 })] }));
-    children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 600 }, children: [new TextRun({ text: 'Asesor de Protección Civil', size: 22 })] }));
+    children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 1200 }, children: [new TextRun({ text: 'Asesor de Protección Civil', size: 22 })] }));
 
     // PÁRRAFO REPRESENTANTE CON NOMBRE Y DIRECCIÓN EN NEGRITAS/SUBRAYADO
     children.push(new Paragraph({
@@ -632,7 +682,7 @@ async function generarResponsiva(req, res) {
     }));
 
     // FIRMA REPRESENTANTE — con espacio para firma
-    children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 60 }, children: [new TextRun({ text: representante, size: 22 })] }));
+    children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 1200, after: 60 }, children: [new TextRun({ text: representante, size: 22 })] }));
     children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 60 }, children: [new TextRun({ text: 'Nombre y Firma', italics: true, size: 22 })] }));
     children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 60 }, children: [new TextRun({ text: 'Representante Legal', size: 22 })] }));
     children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 60 }, children: [new TextRun({ text: razonSocial, bold: true, size: 22 })] }));
