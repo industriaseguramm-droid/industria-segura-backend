@@ -11,7 +11,7 @@ const arcRoutes    = require('./routes/archivos.routes');
 const cliRoutes    = require('./routes/clientes.routes');
 const cfgRoutes    = require('./routes/configuracion.routes');
 const wordRoutes   = require('./routes/word');
-
+const preciosRoutes = require('./routes/precios.routes');
 const app  = express();
 const PORT = process.env.PORT || 3001;
 
@@ -56,7 +56,7 @@ app.use('/api/expedientes',   wordRoutes);
 app.use('/api/archivos',      arcRoutes);
 app.use('/api/clientes',      cliRoutes);
 app.use('/api/configuracion', cfgRoutes);
-
+app.use('/api/precios',       preciosRoutes);
 app.get('/', (req, res) => {
   res.json({
     ok: true,
