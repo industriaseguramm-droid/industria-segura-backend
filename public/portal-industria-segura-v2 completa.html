@@ -400,18 +400,72 @@ footer{background:#111;color:#fff;padding:56px 40px 28px;}
     <button class="cqt" onclick="sCotiz('curso',this)">Curso de Capacitación</button>
     <button class="cqt" onclick="sCotiz('ext',this)">Extintores / Recargas</button>
   </div>
-  <div class="cqp active" id="cqp-plan">
-    <div class="cq-row"><div><div class="cq-lbl">Municipio</div><div class="cq-sub">Afecta costos de gestión y traslado</div></div><select class="cq-sel" id="p-mun" onchange="calcPlan()"><option value="0">Guadalupe</option><option value="0">San Nicolás de los Garza</option><option value="500">Monterrey</option><option value="500">Apodaca</option><option value="500">Escobedo</option><option value="500">Santa Catarina</option><option value="1000">San Pedro Garza García</option><option value="1000">García</option><option value="1500">Otro municipio NL</option></select></div>
-    <div class="cq-row"><div><div class="cq-lbl">Giro del Negocio</div></div><select class="cq-sel" id="p-giro" onchange="calcPlan()"><option value="3500">Comercio / Oficinas</option><option value="4500">Restaurante / Alimentos</option><option value="5500">Salón de Eventos / Educativo</option><option value="6500">Industria / Manufactura</option><option value="8000">Salud / Clínicas</option><option value="10000">Crematorio / Alto riesgo</option></select></div>
-    <div class="cq-row"><div><div class="cq-lbl">Metros cuadrados del inmueble</div></div><select class="cq-sel" id="p-m2" onchange="calcPlan()"><option value="1">Hasta 100 m²</option><option value="1.15">101 — 300 m²</option><option value="1.3">301 — 600 m²</option><option value="1.5">601 — 1,000 m²</option><option value="1.8">Más de 1,000 m²</option></select></div>
-    <div class="cq-row"><div><div class="cq-lbl">Número de trabajadores</div></div><select class="cq-sel" id="p-trab" onchange="calcPlan()"><option value="1">Hasta 10</option><option value="1.1">11 — 25</option><option value="1.2">26 — 50</option><option value="1.35">51 — 100</option><option value="1.6">Más de 100</option></select></div>
-    <div class="cq-row"><div><div class="cq-lbl">¿Renovación o plan nuevo?</div><div class="cq-sub">La renovación puede ser más ágil</div></div><select class="cq-sel" id="p-tipo" onchange="calcPlan()"><option value="0">Plan nuevo (sin antecedentes)</option><option value="-500">Renovación (ya cuenta con antecedentes)</option></select></div>
-    <div class="cq-row"><div><div class="cq-lbl">¿Incluye gestión ante Protección Civil?</div><div class="cq-sub">Trámite del Visto Bueno</div></div><select class="cq-sel" id="p-gest" onchange="calcPlan()"><option value="0">No, solo elaboración del plan</option><option value="2000">Sí, gestión completa incluida</option></select></div>
-    <div class="cq-res"><div><div class="cq-rlbl">Estimado desde</div><div class="cq-price" id="p-precio">$3,500</div></div><div style="text-align:right;font-size:12px;color:#aaa;max-width:200px;">Precio estimado. Cotización formal gratuita sin compromiso.</div></div>
-    <p class="cq-note">* El precio final depende de visita diagnóstico. Incluye planos, señalética y formatos.</p>
-    <button class="btn-cq" onclick="cotWA('Plan de Contingencia')">Solicitar cotización formal →</button>
-    <button class="btn-cq-wa" onclick="cotWA('Plan de Contingencia')">💬 Enviar por WhatsApp</button>
+ <div class="cqp active" id="cqp-plan">
+  <div class="cq-row">
+    <div><div class="cq-lbl">Municipio</div><div class="cq-sub">Afecta costos de gestión y traslado</div></div>
+    <select class="cq-sel" id="p-mun" onchange="calcPlan()">
+      <option value="">Selecciona municipio...</option>
+    </select>
   </div>
+  <div class="cq-row">
+    <div><div class="cq-lbl">Tipo de Plan</div><div class="cq-sub" id="p-tipo-label">Se detecta automáticamente según m² y giro</div></div>
+    <select class="cq-sel" id="p-tipo-manual" onchange="calcPlan()">
+      <option value="auto">Detección automática</option>
+      <option value="municipal">Plan Municipal</option>
+      <option value="estatal">Plan Estatal</option>
+    </select>
+  </div>
+  <div class="cq-row">
+    <div><div class="cq-lbl">Giro del Negocio</div></div>
+    <select class="cq-sel" id="p-giro" onchange="calcPlan()">
+      <option value="normal">Comercio / Oficinas / Restaurante</option>
+      <option value="normal">Industria ligera / Bodega</option>
+      <option value="estatal">Gimnasio</option>
+      <option value="estatal">Hospital / Clínica</option>
+      <option value="estatal">Centro de Estudios / Escuela</option>
+      <option value="normal">Otro</option>
+    </select>
+  </div>
+  <div class="cq-row">
+    <div><div class="cq-lbl">Metros cuadrados de construcción</div></div>
+    <select class="cq-sel" id="p-m2" onchange="calcPlan()">
+      <option value="normal">Menos de 1,000 m²</option>
+      <option value="estatal">1,000 m² o más</option>
+    </select>
+  </div>
+  <div class="cq-row">
+    <div><div class="cq-lbl">Metros cuadrados de terreno</div></div>
+    <select class="cq-sel" id="p-terreno" onchange="calcPlan()">
+      <option value="normal">Menos de 1,500 m²</option>
+      <option value="estatal">1,500 m² o más</option>
+    </select>
+  </div>
+  <div class="cq-row">
+    <div><div class="cq-lbl">¿Renovación o plan nuevo?</div><div class="cq-sub">La renovación puede ser más ágil</div></div>
+    <select class="cq-sel" id="p-tipo" onchange="calcPlan()">
+      <option value="0">Plan nuevo (sin antecedentes)</option>
+      <option value="-500">Renovación (con antecedentes)</option>
+    </select>
+  </div>
+  <div class="cq-row">
+    <div><div class="cq-lbl">¿Incluye gestión ante Protección Civil?</div><div class="cq-sub">Trámite del Visto Bueno</div></div>
+    <select class="cq-sel" id="p-gest" onchange="calcPlan()">
+      <option value="0">No, solo elaboración del plan</option>
+      <option value="0">Sí, incluye gestión y trámite</option>
+    </select>
+  </div>
+  <div class="cq-res">
+    <div>
+      <div class="cq-lbl">Estimado desde</div>
+      <div class="cq-price" id="p-precio">$0</div>
+      <div id="p-tipo-badge" style="font-size:11px;color:#888;margin-top:4px;"></div>
+    </div>
+    <div style="text-align:right;font-size:12px;color:#aaa;max-width:200px;">Precio estimado. Cotización formal gratuita sin compromiso.</div>
+  </div>
+  <p class="cq-note">* El precio final depende de visita diagnóstico. Incluye planos, señalética y formatos. Sujeto a tarifas municipales vigentes.</p>
+  <button class="btn-cq" onclick="cotWA('Plan de Contingencia')">Solicitar cotización formal →</button>
+  <button class="btn-cq-wa" onclick="cotWA('Plan de Contingencia')">🟢 Enviar por WhatsApp</button>
+</div>
   <div class="cqp" id="cqp-curso">
     <div class="cq-row"><div><div class="cq-lbl">Tema del curso</div></div><select class="cq-sel" id="c-tema" onchange="calcCurso()"><option value="3500">Brigada de combate contra incendios</option><option value="3500">Brigada de primeros auxilios / RCP</option><option value="3500">Brigada de evacuación del inmueble</option><option value="4000">Seguridad en espacios confinados</option><option value="4000">Trabajo en alturas</option><option value="4000">LOTO — Control y bloqueo de energía</option><option value="4500">Operación de montacargas</option><option value="4000">Ergonomía industrial</option><option value="3500">NOM-035 Factores psicosociales</option><option value="4500">Manejo seguro de sustancias químicas</option></select></div>
     <div class="cq-row"><div><div class="cq-lbl">Número de participantes</div></div><select class="cq-sel" id="c-part" onchange="calcCurso()"><option value="1">Hasta 10</option><option value="1">11 — 20</option><option value="1.2">21 — 30</option><option value="1.4">Más de 30</option></select></div>
