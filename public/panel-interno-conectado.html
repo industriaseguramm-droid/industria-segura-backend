@@ -1143,7 +1143,73 @@ function toast(msg, tp = 'ok') {
   t.className = 'toast show' + (tp === 'err' ? ' err' : '');
   setTimeout(() => t.classList.remove('show'), 3500);
 }
-// ══════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
+// DESCARGAR ACTA CONSTITUTIVA
+// ══════════════════════════════════════════════════════
+async function descargarActa() {
+  if (!expActivo) return;
+  const btn = document.getElementById('btn-acta');
+  btn.disabled = true;
+  btn.innerHTML = '<span style="display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;margin-right:7px;vertical-align:middle"></span>Generando...';
+  try {
+    const resp = await fetch(`${API_URL}/api/expedientes/${expActivo.id}/generar-acta`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err.error || 'Error ' + resp.status);
+    }
+    const blob = await resp.blob();
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = 'Acta_Constitutiva_' + expActivo.folio + '.docx';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast('Acta Constitutiva descargada correctamente.');
+  } catch (err) {
+    toast('Error: ' + err.message, 'err');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Descargar Acta Constitutiva';
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// DESCARGAR RESPONSIVA
+// ══════════════════════════════════════════════════════
+async function descargarResponsiva() {
+  if (!expActivo) return;
+  const btn = document.getElementById('btn-responsiva');
+  btn.disabled = true;
+  btn.innerHTML = '<span style="display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;margin-right:7px;vertical-align:middle"></span>Generando...';
+  try {
+    const resp = await fetch(`${API_URL}/api/expedientes/${expActivo.id}/generar-responsiva`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err.error || 'Error ' + resp.status);
+    }
+    const blob = await resp.blob();
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = 'Responsiva_' + expActivo.folio + '.docx';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast('Responsiva descargada correctamente.');
+  } catch (err) {
+    toast('Error: ' + err.message, 'err');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Descargar Responsiva';
+  }
+}// ══════════════════════════════════════════════════════════════
 //  DESCARGAR WORD
 // ══════════════════════════════════════════════════════════════
 async function descargarWord() {
