@@ -236,6 +236,31 @@ fetch('https://industria-segura-backend-production.up.railway.app/api/configurac
         a.href = c.instagram_url;
       });
     }
+ })
+    .catch(function(){});
+
+fetch('https://industria-segura-backend-production.up.railway.app/api/configuracion')
+  .then(function(r){ return r.json(); })
+  .then(function(c){
+    var cTema = document.getElementById('c-tema');
+    if(cTema && c.precio_curso_incendios){
+      var pc = {
+        0: parseInt(c.precio_curso_incendios),
+        1: parseInt(c.precio_curso_primeros_auxilios),
+        2: parseInt(c.precio_curso_evacuacion),
+        3: parseInt(c.precio_curso_confinados),
+        4: parseInt(c.precio_curso_alturas),
+        5: parseInt(c.precio_curso_montacargas),
+        6: parseInt(c.precio_curso_alturas),
+        7: parseInt(c.precio_curso_incendios),
+        8: parseInt(c.precio_curso_incendios),
+        9: parseInt(c.precio_curso_montacargas)
+      };
+      for(var i=0; i<cTema.options.length; i++){
+        if(pc[i]) cTema.options[i].value = pc[i];
+      }
+      calcCurso();
+    }
   })
   .catch(function(){});
 </script>
