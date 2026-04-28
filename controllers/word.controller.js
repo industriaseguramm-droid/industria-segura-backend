@@ -391,7 +391,7 @@ async function generarActaConstitutiva(req, res) {
     children.push(new Paragraph({
       alignment: AlignmentType.CENTER,
       spacing: { before: 0, after: 300 },
-      children: [new TextRun({ text: '\u201cActa Constitutiva de la Unidad Interna de Protección Civil del Establecimiento\u201d', bold: true, size: 28 })],
+      children: [new TextRun({ text: '\u201cActa Constitutiva de la Unidad Interna de Protección Civil del Establecimiento\u201d', bold: true, size: 28, font: 'Arial' })],
     }));
 
     // PÁRRAFO INTRO — mezcla normal + itálicas para hora/día/mes
