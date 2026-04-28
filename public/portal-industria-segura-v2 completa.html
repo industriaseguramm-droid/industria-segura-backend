@@ -591,14 +591,56 @@ function sCotiz(id,btn){document.querySelectorAll('.cqp').forEach(p=>p.classList
 function fmt(n){return '$'+Math.round(n).toLocaleString('es-MX');}
 
 function calcPlan(){
-  const g=parseFloat(document.getElementById('p-giro').value);
-  const m=parseFloat(document.getElementById('p-m2').value);
-  const t=parseFloat(document.getElementById('p-trab').value);
-  const ti=parseFloat(document.getElementById('p-tipo').value);
-  const ge=parseFloat(document.getElementById('p-gest').value);
-  const mu=parseFloat(document.getElementById('p-mun').value);
-  let v=Math.max((g*m*t)+ti+ge+mu,2500);
-  document.getElementById('p-precio').textContent=fmt(v);
+  var mun = document.getElementById('p-mun');
+  var giro = document.getElementById('p-giro');
+  var m2 = document.getElementById('p-m2');
+  var terreno = document.getElementById('p-terreno');
+  var tipoManual = document.getElementById('p-tipo-manual');
+  var tipo = document.getElementById('p-tipo');
+  var badge = document.getElementById('p-tipo-badge');
+  var label = document.getElementById('p-tipo-label');
+
+  if(!mun || !mun.value || !window.PRECIOS_MUNICIPIOS){
+    document.getElementById('p-precio').textContent = '$0';
+    return;
+  }
+
+  // Detectar si es estatal
+  var esEstatal = false;
+  if(tipoManual.value === 'estatal') esEstatal = true;
+  else if(tipoManual.value === 'municipal') esEstatal = false;
+  else {
+    // Detección automática
+    if(giro && giro.options[giro.selectedIndex].value === 'estatal') esEstatal = true;
+    if(m2 && m2.options[m2.selectedIndex].value === 'estatal') esEstatal = true;
+    if(terreno && terreno.options[terreno.selectedIndex].value === 'estatal') esEstatal = true;
+  }
+
+  // Buscar precio del municipio
+  var municipioData = window.PRECIOS_MUNICIPIOS.find(function(p){
+    return p.municipio === mun.value;
+  });
+
+  if(!municipioData){
+    document.getElementById('p-precio').textContent = 'Consultar';
+    return;
+  }
+
+  var precio = esEstatal ? municipioData.precio_estatal : municipioData.precio_municipal;
+  var descuento = parseInt(tipo ? tipo.value : 0) || 0;
+  var total = precio + descuento;
+
+  document.getElementById('p-precio').textContent = '$'+total.toLocaleString('es-MX');
+
+  if(badge){
+    badge.textContent = esEstatal ? '📋 Plan Estatal' : '🏙️ Plan Municipal';
+    badge.style.color = esEstatal ? '#C0392B' : '#1A5276';
+  }
+  if(label){
+    label.textContent = esEstatal
+      ? 'Plan Estatal detectado por giro o superficie'
+      : 'Plan Municipal — superficie menor a los límites estatales';
+  }
 }
 function calcCurso(){
   const b=parseFloat(document.getElementById('c-tema').value);
