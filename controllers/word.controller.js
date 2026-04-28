@@ -570,11 +570,64 @@ children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after:
       });
     });
 
-    children.push(new Table({
-      width: { size: 9360, type: WidthType.DXA },
-      columnWidths: [4320, 720, 4320],
-      rows: [headerRow].concat(filas),
-    }));
+    // Encabezados NOMBRE y FIRMA subrayados y centrados
+children.push(new Table({
+  width: { size: 9360, type: WidthType.DXA },
+  columnWidths: [5400, 3960],
+  rows: [
+    new TableRow({
+      children: [
+        new TableCell({
+          borders: noBorders,
+          width: { size: 5400, type: WidthType.DXA },
+          shading: { fill: 'FFFFFF', type: ShadingType.CLEAR },
+          margins: { top: 80, bottom: 80, left: 120, right: 120 },
+          children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: 'NOMBRE', bold: true, underline: {}, size: 22 })] })]
+        }),
+        new TableCell({
+          borders: noBorders,
+          width: { size: 3960, type: WidthType.DXA },
+          shading: { fill: 'FFFFFF', type: ShadingType.CLEAR },
+          margins: { top: 80, bottom: 80, left: 120, right: 120 },
+          children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: 'FIRMA', bold: true, underline: {}, size: 22 })] })]
+        }),
+      ]
+    }),
+  ].concat(filasFirma.map(function(b) {
+    return new TableRow({
+      children: [
+        new TableCell({
+          borders: noBorders,
+          width: { size: 5400, type: WidthType.DXA },
+          shading: { fill: 'FFFFFF', type: ShadingType.CLEAR },
+          margins: { top: 160, bottom: 0, left: 120, right: 120 },
+          children: [
+            new Paragraph({
+              alignment: AlignmentType.LEFT,
+              border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: '000000', space: 1 } },
+              spacing: { after: 160 },
+              children: [new TextRun({ text: b.nombre || '', size: 22 })]
+            })
+          ]
+        }),
+        new TableCell({
+          borders: noBorders,
+          width: { size: 3960, type: WidthType.DXA },
+          shading: { fill: 'FFFFFF', type: ShadingType.CLEAR },
+          margins: { top: 160, bottom: 0, left: 120, right: 120 },
+          children: [
+            new Paragraph({
+              alignment: AlignmentType.LEFT,
+              border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: '000000', space: 1 } },
+              spacing: { after: 160 },
+              children: [new TextRun({ text: '', size: 22 })]
+            })
+          ]
+        }),
+      ]
+    });
+  }))
+}));
 
     var documento = new Document({
       creator: 'Industria Segura MM',
