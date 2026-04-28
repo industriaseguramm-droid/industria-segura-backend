@@ -531,7 +531,21 @@ body{font-family:'DM Sans',sans-serif;background:var(--panel);color:var(--texto)
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           Descargar Resumen Word
         </button>
-      </div>
+     <button
+  id="btn-acta"
+  onclick="descargarActa()"
+  style="display:flex;align-items:center;gap:7px;padding:9px 18px;background:#1A5276;color:#fff;border:none;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer;transition:all .2s;margin-top:8px">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+  Descargar Acta Constitutiva
+</button>
+<button
+  id="btn-responsiva"
+  onclick="descargarResponsiva()"
+  style="display:flex;align-items:center;gap:7px;padding:9px 18px;background:#1A7A4A;color:#fff;border:none;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer;transition:all .2s;margin-top:8px">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+  Descargar Responsiva
+</button>
+        </div>
         <div class="box-title"><div class="box-dot"></div>Enviar observación</div>
         <textarea class="obs-ta" id="obs-in" placeholder="Escribe lo que le falta al cliente o tu comentario..."></textarea>
         <div class="obs-ft">
