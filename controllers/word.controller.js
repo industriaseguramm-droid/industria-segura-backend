@@ -632,6 +632,13 @@ children.push(new Table({
     var documento = new Document({
       creator: 'Industria Segura MM',
       title: 'Acta Constitutiva ' + nombreEst,
+      styles: {
+        default: {
+          document: {
+            run: { font: 'Arial', size: 24 }
+          }
+        }
+      },
       sections: [{
         properties: { page: { size: { width: 12240, height: 15840 }, margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 } } },
         children: children
