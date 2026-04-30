@@ -3,7 +3,12 @@ const express = require('express');
 const cors    = require('cors');
 const morgan  = require('morgan');
 const path    = require('path');
+const cors = require('cors');
 
+app.use(cors({
+  origin: ['https://industriaseguramm.com', 'https://www.industriaseguramm.com'],
+  credentials: true
+}));
 const authRoutes   = require('./routes/auth.routes');
 const portalRoutes = require('./routes/portal.routes');
 const expRoutes    = require('./routes/expedientes.routes');
