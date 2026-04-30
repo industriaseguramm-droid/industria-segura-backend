@@ -57,13 +57,9 @@ app.use('/api/archivos',      arcRoutes);
 app.use('/api/clientes',      cliRoutes);
 app.use('/api/configuracion', cfgRoutes);
 app.use('/api/precios',       preciosRoutes);
+// ESTO (línea nueva)
 app.get('/', (req, res) => {
-  res.json({
-    ok: true,
-    mensaje: 'Industria Segura MM API funcionando',
-    health: '/health',
-    portal: '/portal/TOKEN_DEL_CLIENTE'
-  });
+  res.sendFile(path.join(__dirname, 'public', 'portal-industria-segura-v2 completa.html'));
 });
 
 app.get('/panel', (req, res) => {
